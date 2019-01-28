@@ -17,7 +17,7 @@
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "tsc --module commonjs && rollup -c rollup.config.ts",
-    "start": "rollup -c rollup.config.ts -w"
+    "watch": "rollup -c rollup.config.ts -w"
   },
   "libraryConfig": {
     "name": "Fench"

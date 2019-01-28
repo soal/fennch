@@ -125,7 +125,7 @@ class Fench {
   // }
 
   private setup(method) {
-    return (abortSignal, path = "/", options: FenchOptions) => {
+    return (abortSignal, path = "/", options: FenchOptions = this.opts) => {
       // path must be string
       if (typeof path !== "string") {
         throw new TypeError("`path` must be a string");

@@ -63,9 +63,12 @@ export default function createRequest(args: {
   });
   opts.headers = new Headers(headersObj);
 
-  opts.method = options.method = "del"
-    ? "DELETE"
-    : options.method.toUpperCase();
+  if (options.method) {
+    opts.method =
+      options.method === "del" ? "DELETE" : options.method.toUpperCase();
+  } else {
+    options.method = "GET";
+  }
 
   // Creating body if nedeed
   if (
