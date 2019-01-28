@@ -1,6 +1,6 @@
 export interface IFenchRequest {
     body?: object;
-    endpoint: string;
+    path: string;
     headers: object;
     method?: string;
     mode: string;

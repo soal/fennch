@@ -1,7 +1,7 @@
 import { IFenchRequest } from "./fRequest";
 export interface IFenchResponse {
     body?: object | string | Blob;
-    endpoint: string;
+    path: string;
     err?: Error;
     headers: object;
     ok: boolean;

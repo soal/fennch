@@ -59,7 +59,6 @@ var Interceptors = /** @class */ (function () {
         this.interceptors = [];
     };
     Interceptors.prototype.interceptedMethod = function (methodFn) {
-        var _this = this;
         var args = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             args[_i - 1] = arguments[_i];
@@ -96,18 +95,26 @@ var Interceptors = /** @class */ (function () {
                 promise = promise.catch(responseError);
             }
         });
-        if (this.API.timeout > 0) {
+        var timeout = 0;
+        if (typeof args[args.length - 1] === "object" &&
+            typeof args[args.length - 1].timeout === "number") {
+            timeout = args[args.length - 1].timeout;
+        }
+        else {
+            timeout = this.API.timeout;
+        }
+        if (timeout > 0) {
             var timer = new Promise(function (resolve, reject) {
                 setTimeout(function () {
                     reject(new Error("Timeout exceeded"));
-                }, _this.API.timeout);
+                }, timeout);
             });
-            return abortablePromise_1.default.race(abortController, [promise, timer]).then(function (value) {
-                if (value && value.type === "timeout") {
+            return abortablePromise_1.default.race(abortController, [promise, timer]).then(function (value) { return value; }, function (err) {
+                if (err && err.message === "Timeout exceeded") {
                     promise.abort();
                 }
-                return value;
-            }, function (err) { return Promise.reject(err); });
+                return Promise.reject(err);
+            });
         }
         return promise;
     };

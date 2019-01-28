@@ -199,7 +199,6 @@
             this.interceptors = [];
         };
         Interceptors.prototype.interceptedMethod = function (methodFn) {
-            var _this = this;
             var args = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 args[_i - 1] = arguments[_i];
@@ -236,18 +235,26 @@
                     promise = promise.catch(responseError);
                 }
             });
-            if (this.API.timeout > 0) {
+            var timeout = 0;
+            if (typeof args[args.length - 1] === "object" &&
+                typeof args[args.length - 1].timeout === "number") {
+                timeout = args[args.length - 1].timeout;
+            }
+            else {
+                timeout = this.API.timeout;
+            }
+            if (timeout > 0) {
                 var timer = new Promise(function (resolve, reject) {
                     setTimeout(function () {
                         reject(new Error("Timeout exceeded"));
-                    }, _this.API.timeout);
+                    }, timeout);
                 });
-                return AbortablePromise.race(abortController, [promise, timer]).then(function (value) {
-                    if (value && value.type === "timeout") {
+                return AbortablePromise.race(abortController, [promise, timer]).then(function (value) { return value; }, function (err) {
+                    if (err && err.message === "Timeout exceeded") {
                         promise.abort();
                     }
-                    return value;
-                }, function (err) { return Promise.reject(err); });
+                    return Promise.reject(err);
+                });
             }
             return promise;
         };
@@ -261,8 +268,7 @@
         var baseURI = args.baseURI, globalHeaders = args.globalHeaders, path = args.path, options = args.options, arrayFormat = args.arrayFormat, abortSignal = args.abortSignal;
         var opts = {};
         // Creating URI
-        var endpoint = urlJoin(baseURI, path);
-        var fullUri = urlJoin(endpoint, "" + (options.params ? "?" + qs.stringify(options.params, { arrayFormat: arrayFormat }) : ""));
+        var fullUri = urlJoin(baseURI, path, "" + (options.params ? "?" + qs.stringify(options.params, { arrayFormat: arrayFormat }) : ""));
         // Creating headers
         // remove any null or blank headers
         // (e.g. to automatically set Content-Type with `FormData` boundary)
@@ -275,7 +281,13 @@
             }
         });
         opts.headers = new Headers(headersObj);
-        opts.method = options.method = "DELETE";
+        if (options.method) {
+            opts.method =
+                options.method === "del" ? "DELETE" : options.method.toUpperCase();
+        }
+        else {
+            options.method = "GET";
+        }
         // Creating body if nedeed
         if (options.method.toLowerCase() !== "get" &&
             options.method.toLowerCase() !== "head") {
@@ -285,7 +297,7 @@
             opts.mode = options.mode;
         }
         opts.signal = abortSignal;
-        return __assign({}, opts, { endpoint: endpoint, params: options.params, raw: new Request(fullUri, opts), url: fullUri });
+        return __assign({}, opts, { path: path, params: options.params, raw: new Request(fullUri, opts), url: fullUri });
     }
 
     function parseResponse(res, contentType) {
@@ -376,7 +388,7 @@
                     case 0:
                         fResponse = {
                             body: null,
-                            endpoint: fRequest.endpoint,
+                            path: fRequest.path,
                             headers: {},
                             ok: rawResponse.ok,
                             raw: rawResponse,
@@ -432,17 +444,15 @@
                 value: opts.parseErr ||
                     new Error("Invalid JSON received" + (opts.baseURI ? " from " + opts.baseURI : ""))
             });
-            this.headers = __assign({}, opts.headers);
             this.opts.arrayFormat = opts.arrayFormat || "indices";
-            // this.raw = opts.raw === true;
-            // if (opts.auth) {
-            //   this.auth(opts.auth);
-            // }
             methods.forEach(function (method) {
                 _this[method] = _this.setup(method);
             });
+            this.req = function (abortSignal, request) {
+                return _this.makeRequest(abortSignal, request);
+            };
             // interceptor should be initialized after methods setup
-            this.interceptor = new Interceptors(this, methods);
+            this.interceptor = new Interceptors(this, __spread(methods, ["req"]));
             this.timeout = opts.timeout || 0;
         }
         // public auth(creds) {
@@ -492,48 +502,64 @@
         //   }
         //   return this;
         // }
-        Fench.prototype.setup = function (method) {
+        Fench.prototype.makeRequest = function (abortSignal, fRequest) {
             var _this = this;
-            return function (abortSignal, path, options) {
-                if (path === void 0) { path = "/"; }
-                // path must be string
-                if (typeof path !== "string") {
+            return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                var rawResponse, fResponse, err_1;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            _a.trys.push([0, 3, , 4]);
+                            return [4 /*yield*/, fetch(fRequest.raw)];
+                        case 1:
+                            rawResponse = _a.sent();
+                            return [4 /*yield*/, createResponse(rawResponse, fRequest)];
+                        case 2:
+                            fResponse = _a.sent();
+                            resolve(fResponse);
+                            return [3 /*break*/, 4];
+                        case 3:
+                            err_1 = _a.sent();
+                            reject(err_1);
+                            return [3 /*break*/, 4];
+                        case 4: return [2 /*return*/];
+                    }
+                });
+            }); });
+        };
+        Fench.prototype.prepareRequest = function (abortSignal, pathOrRequest, options) {
+            if (pathOrRequest === void 0) { pathOrRequest = "/"; }
+            if (options && (typeof options !== "object" || Array.isArray(options))) {
+                throw new TypeError("`options` must be an object");
+            }
+            options = __assign({}, this.opts, options);
+            var fRequest = null;
+            var req = pathOrRequest;
+            // const req = pathOrRequest;
+            if (req.headers) {
+                fRequest = req;
+            }
+            else {
+                if (typeof pathOrRequest !== "string") {
                     throw new TypeError("`path` must be a string");
                 }
-                // otherwise check if its an object
-                if (typeof options !== "object" || Array.isArray(options)) {
-                    throw new TypeError("`options` must be an object");
-                }
-                return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                    var fRequest, rawResponse, fResponse, err_1;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                _a.trys.push([0, 3, , 4]);
-                                fRequest = createRequest({
-                                    baseURI: this.opts.baseURI,
-                                    globalHeaders: this.opts.headers,
-                                    path: path,
-                                    options: options,
-                                    arrayFormat: this.opts.arrayFormat,
-                                    abortSignal: abortSignal
-                                });
-                                return [4 /*yield*/, fetch(fRequest.raw)];
-                            case 1:
-                                rawResponse = _a.sent();
-                                return [4 /*yield*/, createResponse(rawResponse, fRequest)];
-                            case 2:
-                                fResponse = _a.sent();
-                                resolve(fResponse);
-                                return [3 /*break*/, 4];
-                            case 3:
-                                err_1 = _a.sent();
-                                reject(err_1);
-                                return [3 /*break*/, 4];
-                            case 4: return [2 /*return*/];
-                        }
-                    });
-                }); });
+                fRequest = createRequest({
+                    baseURI: this.opts.baseURI,
+                    globalHeaders: this.opts.headers,
+                    path: pathOrRequest,
+                    options: options,
+                    arrayFormat: this.opts.arrayFormat,
+                    abortSignal: abortSignal
+                });
+            }
+            return fRequest;
+        };
+        Fench.prototype.setup = function (method) {
+            var _this = this;
+            return function (abortSignal, pathOrRequest, options) {
+                if (pathOrRequest === void 0) { pathOrRequest = "/"; }
+                var request = _this.prepareRequest(abortSignal, pathOrRequest, options);
+                return _this.makeRequest(abortSignal, request);
             };
         };
         return Fench;

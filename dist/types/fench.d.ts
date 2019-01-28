@@ -13,11 +13,14 @@ declare class Fench {
     interceptor: object;
     timeout: number;
     parseErr?: Error;
+    req: any;
     private opts;
     private headers;
     private raw;
     private arrayFormat;
     constructor(opts?: FenchOptions);
+    private makeRequest;
+    private prepareRequest;
     private setup;
 }
 export default Fench;

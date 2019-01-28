@@ -149,7 +149,7 @@ function createResponse(rawResponse, fRequest) {
                 case 0:
                     fResponse = {
                         body: null,
-                        endpoint: fRequest.endpoint,
+                        path: fRequest.path,
                         headers: {},
                         ok: rawResponse.ok,
                         raw: rawResponse,

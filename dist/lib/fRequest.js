@@ -35,8 +35,7 @@ function createRequest(args) {
     var baseURI = args.baseURI, globalHeaders = args.globalHeaders, path = args.path, options = args.options, arrayFormat = args.arrayFormat, abortSignal = args.abortSignal;
     var opts = {};
     // Creating URI
-    var endpoint = urlJoin(baseURI, path);
-    var fullUri = urlJoin(endpoint, "" + (options.params ? "?" + qs.stringify(options.params, { arrayFormat: arrayFormat }) : ""));
+    var fullUri = urlJoin(baseURI, path, "" + (options.params ? "?" + qs.stringify(options.params, { arrayFormat: arrayFormat }) : ""));
     // Creating headers
     // remove any null or blank headers
     // (e.g. to automatically set Content-Type with `FormData` boundary)
@@ -49,9 +48,13 @@ function createRequest(args) {
         }
     });
     opts.headers = new Headers(headersObj);
-    opts.method = options.method = "del"
-        ? "DELETE"
-        : options.method.toUpperCase();
+    if (options.method) {
+        opts.method =
+            options.method === "del" ? "DELETE" : options.method.toUpperCase();
+    }
+    else {
+        options.method = "GET";
+    }
     // Creating body if nedeed
     if (options.method.toLowerCase() !== "get" &&
         options.method.toLowerCase() !== "head") {
@@ -61,7 +64,7 @@ function createRequest(args) {
         opts.mode = options.mode;
     }
     opts.signal = abortSignal;
-    return __assign({}, opts, { endpoint: endpoint, params: options.params, raw: new Request(fullUri, opts), url: fullUri });
+    return __assign({}, opts, { path: path, params: options.params, raw: new Request(fullUri, opts), url: fullUri });
 }
 exports.default = createRequest;
 //# sourceMappingURL=fRequest.js.map
