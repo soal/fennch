@@ -94,13 +94,13 @@ class Interceptors implements IInterceptors {
       });
 
       return AbortablePromise.race(abortController, [promise, timer]).then(
-        value => {
-          if (value && value.type === "timeout") {
+        value => value,
+        err => {
+          if (err && err.message === "Timeout exceeded") {
             promise.abort();
           }
-          return value;
-        },
-        err => Promise.reject(err)
+          return Promise.reject(err);
+        }
       );
     }
     return promise;
