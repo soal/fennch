@@ -15,7 +15,7 @@ const methods = [
 
 type FenchOptions = RequestInit & {
   parseErr?: Error;
-  headers?: object;
+  headers?: { Authorization: string } & object;
   baseURI?: string;
   raw?: boolean;
   arrayFormat?: string;
@@ -53,6 +53,7 @@ class Fench {
     methods.forEach(method => {
       this[method] = this.setup(method);
     });
+
     this.req = (abortSignal: AbortSignal, request: IFenchRequest) => {
       return this.makeRequest(abortSignal, request);
     };
@@ -105,18 +106,22 @@ class Fench {
 
   //   return this;
   // }
-
-  // public jwt(token) {
-  //   if (token === null) {
-  //     delete this.headers.Authorization;
-  //   } else if (typeof token === "string") {
-  //     this.headers.Authorization = `Bearer ${token}`;
-  //   } else {
-  //     throw new TypeError("jwt token must be a string");
-  //   }
-
-  //   return this;
+  // public req(abortSignal: AbortSignal, request: IFenchRequest) {
+  //   return this.makeRequest(abortSignal, request);
   // }
+
+  public jwt(token) {
+    if (token === null) {
+      delete this.opts.headers.Authorization;
+    } else if (typeof token === "string") {
+      this.opts.headers.Authorization = `Bearer ${token}`;
+    } else {
+      throw new TypeError("jwt token must be a string");
+    }
+
+    return this;
+  }
+
   private makeRequest(abortSignal: AbortSignal, fRequest: IFenchRequest) {
     return new Promise(async (resolve, reject) => {
       try {
