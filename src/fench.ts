@@ -35,9 +35,12 @@ class Fench {
   private headers: object;
   private raw: boolean;
   private arrayFormat: string;
+  private fetch: any;
 
-  constructor(opts: FenchOptions = {}) {
+  constructor(opts: FenchOptions = {}, fetchImpl = null) {
     this.opts = opts;
+
+    this.fetch = fetchImpl || fetch.bind(global);
 
     Object.defineProperty(this, "parseErr", {
       enumerable: false,
@@ -125,7 +128,7 @@ class Fench {
   private makeRequest(abortSignal: AbortSignal, fRequest: IFenchRequest) {
     return new Promise(async (resolve, reject) => {
       try {
-        const rawResponse = await fetch(fRequest.raw);
+        const rawResponse = await this.fetch(fRequest.raw);
         const fResponse = await createResponse(rawResponse, fRequest);
 
         resolve(fResponse);
@@ -151,7 +154,6 @@ class Fench {
     let fRequest: any = null;
 
     const req = <IFenchRequest>(<unknown>pathOrRequest);
-    // const req = pathOrRequest;
     if (req.headers) {
       fRequest = req;
     } else {
