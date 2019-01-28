@@ -47,9 +47,9 @@ class Fench {
         )
     });
 
-    this.headers = {
-      ...opts.headers
-    };
+    // this.headers = {
+    //   ...opts.headers
+    // };
 
     this.opts.arrayFormat = opts.arrayFormat || "indices";
 
@@ -125,16 +125,20 @@ class Fench {
   // }
 
   private setup(method) {
-    return (abortSignal, path = "/", options: FenchOptions = this.opts) => {
+    return (abortSignal, path = "/", options: FenchOptions) => {
       // path must be string
       if (typeof path !== "string") {
         throw new TypeError("`path` must be a string");
       }
 
       // otherwise check if its an object
-      if (typeof options !== "object" || Array.isArray(options)) {
+      if (options && (typeof options !== "object" || Array.isArray(options))) {
         throw new TypeError("`options` must be an object");
       }
+      options = {
+        ...this.opts,
+        ...options
+      };
 
       return new Promise(async (resolve, reject) => {
         try {

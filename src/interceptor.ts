@@ -86,11 +86,22 @@ class Interceptors implements IInterceptors {
       }
     });
 
-    if (this.API.timeout > 0) {
+    let timeout = 0;
+
+    if (
+      typeof args[args.length - 1] === "object" &&
+      typeof args[args.length - 1].timeout === "number"
+    ) {
+      timeout = args[args.length - 1].timeout;
+    } else {
+      timeout = this.API.timeout;
+    }
+
+    if (timeout > 0) {
       const timer = new Promise((resolve, reject) => {
         setTimeout(() => {
           reject(new Error("Timeout exceeded"));
-        }, this.API.timeout);
+        }, timeout);
       });
 
       return AbortablePromise.race(abortController, [promise, timer]).then(
