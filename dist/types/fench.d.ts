@@ -1,6 +1,8 @@
 declare type FenchOptions = RequestInit & {
     parseErr?: Error;
-    headers?: object;
+    headers?: {
+        Authorization: string;
+    } & object;
     baseURI?: string;
     raw?: boolean;
     arrayFormat?: string;
@@ -18,7 +20,9 @@ declare class Fench {
     private headers;
     private raw;
     private arrayFormat;
-    constructor(opts?: FenchOptions);
+    private fetch;
+    constructor(opts?: FenchOptions, fetchImpl?: any);
+    jwt(token: any): this;
     private makeRequest;
     private prepareRequest;
     private setup;

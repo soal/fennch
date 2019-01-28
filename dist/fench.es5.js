@@ -429,10 +429,12 @@ var methods = [
     "patch"
 ];
 var Fench = /** @class */ (function () {
-    function Fench(opts) {
+    function Fench(opts, fetchImpl) {
         if (opts === void 0) { opts = {}; }
+        if (fetchImpl === void 0) { fetchImpl = null; }
         var _this = this;
         this.opts = opts;
+        this.fetch = fetchImpl || fetch.bind(global);
         Object.defineProperty(this, "parseErr", {
             enumerable: false,
             value: opts.parseErr ||
@@ -486,16 +488,21 @@ var Fench = /** @class */ (function () {
     //   }
     //   return this;
     // }
-    // public jwt(token) {
-    //   if (token === null) {
-    //     delete this.headers.Authorization;
-    //   } else if (typeof token === "string") {
-    //     this.headers.Authorization = `Bearer ${token}`;
-    //   } else {
-    //     throw new TypeError("jwt token must be a string");
-    //   }
-    //   return this;
+    // public req(abortSignal: AbortSignal, request: IFenchRequest) {
+    //   return this.makeRequest(abortSignal, request);
     // }
+    Fench.prototype.jwt = function (token) {
+        if (token === null) {
+            delete this.opts.headers.Authorization;
+        }
+        else if (typeof token === "string") {
+            this.opts.headers.Authorization = "Bearer " + token;
+        }
+        else {
+            throw new TypeError("jwt token must be a string");
+        }
+        return this;
+    };
     Fench.prototype.makeRequest = function (abortSignal, fRequest) {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
@@ -504,7 +511,7 @@ var Fench = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         _a.trys.push([0, 3, , 4]);
-                        return [4 /*yield*/, fetch(fRequest.raw)];
+                        return [4 /*yield*/, this.fetch(fRequest.raw)];
                     case 1:
                         rawResponse = _a.sent();
                         return [4 /*yield*/, createResponse(rawResponse, fRequest)];
@@ -529,7 +536,6 @@ var Fench = /** @class */ (function () {
         options = __assign({}, this.opts, options);
         var fRequest = null;
         var req = pathOrRequest;
-        // const req = pathOrRequest;
         if (req.headers) {
             fRequest = req;
         }
