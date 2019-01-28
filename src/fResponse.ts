@@ -6,7 +6,7 @@ type ModernHeaders = Headers & {
 
 export interface IFenchResponse {
   body?: object | string | Blob;
-  endpoint: string;
+  path: string;
   err?: Error;
   headers: object;
   ok: boolean;
@@ -85,7 +85,7 @@ export default async function createResponse(
 ): Promise<IFenchResponse> {
   const fResponse: IFenchResponse = {
     body: null,
-    endpoint: fRequest.endpoint,
+    path: fRequest.path,
     headers: {},
     ok: rawResponse.ok,
     raw: rawResponse,

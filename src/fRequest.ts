@@ -6,7 +6,7 @@ const qs = require("qs");
 
 export interface IFenchRequest {
   body?: object;
-  endpoint: string;
+  path: string;
   headers: object;
   method?: string;
   mode: string;
@@ -43,9 +43,9 @@ export default function createRequest(args: {
 
   const opts: any = {};
   // Creating URI
-  const endpoint = urlJoin(baseURI, path);
   const fullUri = urlJoin(
-    endpoint,
+    baseURI,
+    path,
     `${
       options.params ? "?" + qs.stringify(options.params, { arrayFormat }) : ""
     }`
@@ -86,7 +86,7 @@ export default function createRequest(args: {
 
   return {
     ...opts,
-    endpoint,
+    path,
     params: options.params,
     raw: new Request(fullUri, opts),
     url: fullUri

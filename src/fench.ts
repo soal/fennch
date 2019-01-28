@@ -29,6 +29,7 @@ class Fench {
   public interceptor: object;
   public timeout: number;
   public parseErr?: Error;
+  public req: any;
 
   private opts: FenchOptions;
   private headers: object;
@@ -47,24 +48,17 @@ class Fench {
         )
     });
 
-    // this.headers = {
-    //   ...opts.headers
-    // };
-
     this.opts.arrayFormat = opts.arrayFormat || "indices";
-
-    // this.raw = opts.raw === true;
-
-    // if (opts.auth) {
-    //   this.auth(opts.auth);
-    // }
 
     methods.forEach(method => {
       this[method] = this.setup(method);
     });
+    this.req = (abortSignal: AbortSignal, request: IFenchRequest) => {
+      return this.makeRequest(abortSignal, request);
+    };
 
     // interceptor should be initialized after methods setup
-    this.interceptor = new Interceptor(this, methods);
+    this.interceptor = new Interceptor(this, [...methods, "req"]);
     this.timeout = opts.timeout || 0;
   }
 
@@ -123,42 +117,60 @@ class Fench {
 
   //   return this;
   // }
+  private makeRequest(abortSignal: AbortSignal, fRequest: IFenchRequest) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const rawResponse = await fetch(fRequest.raw);
+        const fResponse = await createResponse(rawResponse, fRequest);
 
-  private setup(method) {
-    return (abortSignal, path = "/", options: FenchOptions) => {
-      // path must be string
-      if (typeof path !== "string") {
+        resolve(fResponse);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  }
+
+  private prepareRequest(
+    abortSignal,
+    pathOrRequest = "/",
+    options: FenchOptions
+  ) {
+    if (options && (typeof options !== "object" || Array.isArray(options))) {
+      throw new TypeError("`options` must be an object");
+    }
+    options = {
+      ...this.opts,
+      ...options
+    };
+
+    let fRequest: any = null;
+
+    const req = <IFenchRequest>(<unknown>pathOrRequest);
+    // const req = pathOrRequest;
+    if (req.headers) {
+      fRequest = req;
+    } else {
+      if (typeof pathOrRequest !== "string") {
         throw new TypeError("`path` must be a string");
       }
 
-      // otherwise check if its an object
-      if (options && (typeof options !== "object" || Array.isArray(options))) {
-        throw new TypeError("`options` must be an object");
-      }
-      options = {
-        ...this.opts,
-        ...options
-      };
-
-      return new Promise(async (resolve, reject) => {
-        try {
-          const fRequest = createRequest({
-            baseURI: this.opts.baseURI,
-            globalHeaders: this.opts.headers,
-            path,
-            options,
-            arrayFormat: this.opts.arrayFormat,
-            abortSignal
-          });
-
-          const rawResponse = await fetch(fRequest.raw);
-          const fResponse = await createResponse(rawResponse, fRequest);
-
-          resolve(fResponse);
-        } catch (err) {
-          reject(err);
-        }
+      fRequest = createRequest({
+        baseURI: this.opts.baseURI,
+        globalHeaders: this.opts.headers,
+        path: pathOrRequest,
+        options,
+        arrayFormat: this.opts.arrayFormat,
+        abortSignal
       });
+    }
+
+    return fRequest;
+  }
+
+  private setup(method) {
+    return (abortSignal, pathOrRequest = "/", options: FenchOptions) => {
+      const request = this.prepareRequest(abortSignal, pathOrRequest, options);
+      return this.makeRequest(abortSignal, request);
     };
   }
 }
