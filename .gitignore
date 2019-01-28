@@ -50,5 +50,11 @@ node_modules/
 # dotenv environment variables file
 .env
 
-# Sublime Text project files
+# Editors project files
 *.sublime-*
+.vscode
+.idea
+
+compiled
+.awcache
+.rpt2_cache
