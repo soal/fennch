@@ -4,44 +4,15 @@
 const urlJoin = require("url-join");
 const qs = require("qs");
 
-export interface IFenchRequest {
-  body?: object;
-  path: string;
-  headers: object;
-  method?: string;
-  mode: string;
-  raw?: Request;
-  params?: object;
-  signal: AbortSignal;
-  url: string;
-}
-
-interface IOptions {
-  params?: object;
-  body?: object;
-  headers?: object;
-  method?: string;
-  mode?: string;
-}
-
-export default function createRequest(args: {
-  baseURI: string;
-  globalHeaders: object;
-  path: string;
-  options: IOptions;
-  arrayFormat: string;
-  abortSignal: AbortSignal;
-}): IFenchRequest {
-  const {
-    baseURI,
-    globalHeaders,
-    path,
-    options,
-    arrayFormat,
-    abortSignal
-  } = args;
-
-  const opts: any = {};
+export default function createRequest({
+  baseURI,
+  globalHeaders,
+  path,
+  options,
+  arrayFormat.
+  abortSignal
+} = {}) {
+  const opts = {};
   // Creating URI
   const fullUri = urlJoin(
     baseURI,
@@ -67,13 +38,13 @@ export default function createRequest(args: {
     opts.method =
       options.method === "del" ? "DELETE" : options.method.toUpperCase();
   } else {
-    options.method = "GET";
+    opts.method = "GET";
   }
 
   // Creating body if nedeed
   if (
-    options.method.toLowerCase() !== "get" &&
-    options.method.toLowerCase() !== "head"
+    opts.method.toLowerCase() !== "get" &&
+    opts.method.toLowerCase() !== "head"
   ) {
     opts.body = options.body;
   }
@@ -85,10 +56,13 @@ export default function createRequest(args: {
   opts.signal = abortSignal;
 
   return {
-    ...opts,
+    headers: opts.headers,
+    method: opts.method,
+    mode: opts.mode,
     path,
     params: options.params,
     raw: new Request(fullUri, opts),
+    signal: opts.signal,
     url: fullUri
   };
 }

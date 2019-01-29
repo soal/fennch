@@ -1,23 +1,8 @@
 import AbortablePromise from "./abortablePromise";
 import createResponse from "./fResponse";
 
-interface IInterceptor {
-  request?: (request?: any) => any;
-  requestError?: (err?: any) => any;
-  response?: (response?: any, request?: any) => any;
-  responseError?: (err?: any) => any;
-}
-
-interface IInterceptors {
-  interceptors: IInterceptor[];
-  API: object;
-}
-
-class Interceptors implements IInterceptors {
-  public interceptors;
-  public API;
-
-  constructor(API: object, interceptableMethods: any[] = []) {
+class Interceptors {
+  constructor(API, interceptableMethods = []) {
     this.interceptors = [];
 
     if (!API) {
@@ -35,19 +20,19 @@ class Interceptors implements IInterceptors {
     });
   }
 
-  public register(interceptor) {
+  register(interceptor) {
     this.interceptors.push(interceptor);
     return () => this.unregister(interceptor);
   }
 
-  public unregister(interceptor) {
+  unregister(interceptor) {
     const index = this.interceptors.indexOf(interceptor);
     if (index >= 0) {
       this.interceptors.splice(index, 1);
     }
   }
 
-  public clear() {
+  clear() {
     this.interceptors = [];
   }
 

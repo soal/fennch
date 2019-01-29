@@ -1,26 +1,6 @@
-import { IFenchRequest } from "./fRequest";
-
-type ModernHeaders = Headers & {
-  [Symbol.iterator](): Iterator<string[]>;
-};
-
-export interface IFenchResponse {
-  body?: object | string | Blob;
-  path: string;
-  err?: Error;
-  headers: object;
-  ok: boolean;
-  raw: Response;
-  request: IFenchRequest;
-  status: number;
-  statusText: string;
-  type: string;
-  url: string;
-}
-
-async function parseResponse(res: Response, contentType: string) {
-  let body: any = null;
-  let err: any = null;
+async function parseResponse(res, contentType) {
+  let body = null;
+  let err = null;
   if (res.ok) {
     if (contentType && contentType.includes("application/json")) {
       try {
@@ -79,14 +59,12 @@ async function parseResponse(res: Response, contentType: string) {
   return { body, err };
 }
 
-export default async function createResponse(
-  rawResponse: Response,
-  fRequest: IFenchRequest
-): Promise<IFenchResponse> {
-  const fResponse: IFenchResponse = {
+export default async function createResponse(rawResponse, fRequest) {
+  const fResponse = {
     body: null,
     path: fRequest.path,
     headers: {},
+    err: null,
     ok: rawResponse.ok,
     raw: rawResponse,
     request: fRequest,
@@ -96,7 +74,7 @@ export default async function createResponse(
     url: rawResponse.url
   };
 
-  for (const [key, value] of rawResponse.headers as any) {
+  for (const [key, value] of rawResponse.headers) {
     fResponse.headers[key] = value;
   }
 
