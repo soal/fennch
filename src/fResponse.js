@@ -65,27 +65,41 @@ export default async function createResponse(rawResponse, fRequest) {
     path: fRequest.path,
     headers: {},
     err: null,
-    ok: rawResponse.ok,
-    raw: rawResponse,
+    ok: false,
+    raw: null,
     request: fRequest,
-    status: rawResponse.status,
-    statusText: rawResponse.statusText,
-    type: rawResponse.type,
-    url: rawResponse.url
+    status: null,
+    statusText: null,
+    type: null,
+    url: null
   };
 
-  for (const [key, value] of rawResponse.headers) {
-    fResponse.headers[key] = value;
+  if (rawResponse instanceof Response) {
+    fResponse.ok = rawResponse.ok;
+    fResponse.raw = rawResponse;
+    fResponse.status = rawResponse.status;
+    fResponse.statusText = rawResponse.statusText;
+    fResponse.type = rawResponse.type;
+    fResponse.url = rawResponse.url;
+
+    for (const [key, value] of rawResponse.headers) {
+      fResponse.headers[key] = value;
+    }
+
+    const { body, err } = await parseResponse(
+      rawResponse,
+      rawResponse.headers.get("Content-Type")
+    );
+
+    if (err) {
+      fResponse.err = err;
+    }
+    fResponse.body = body;
+  } else {
+    fResponse.ok = false
+    fResponse.err = rawResponse
+    statusText: rawResponse.message || null
   }
 
-  const { body, err } = await parseResponse(
-    rawResponse,
-    rawResponse.headers.get("Content-Type")
-  );
-
-  if (err) {
-    fResponse.err = err;
-  }
-  fResponse.body = body;
   return fResponse;
 }

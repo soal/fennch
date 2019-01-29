@@ -41,13 +41,13 @@ class Interceptor {
     const reversedInterceptors = this.interceptors.slice().reverse();
 
     const abortController = new AbortController();
-    let promise = AbortablePromise.resolve(abortController, args);
+    let promise = AbortablePromise.resolve(abortController, ...args);
 
     // Register request interceptors
     this.interceptors.forEach(({ request, requestError }) => {
       if (typeof request === "function") {
-        promise = promise.then(args =>
-          request(promise.abortController.signal, ...[].concat(args))
+        promise = promise.then((...args) =>
+          request(promise.abortController.signal, ...args)
         );
       }
       if (typeof requestError === "function") {
@@ -57,8 +57,8 @@ class Interceptor {
 
     // Register methodFn call
     if (typeof methodFn === "function") {
-      promise = promise.then(args =>
-        methodFn(promise.abortController.signal, ...[].concat(args))
+      promise = promise.then((...args) =>
+        methodFn(promise.abortController.signal, ...args)
       );
     }
 

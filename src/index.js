@@ -90,7 +90,8 @@ export default function Fench(
 
         resolve(fResponse);
       } catch (err) {
-        reject(err);
+        const fResponse = await createResponse(err, fRequest);
+        reject(fResponse);
       }
     });
   };
