@@ -9,7 +9,7 @@ export default function createRequest({
   globalHeaders,
   path,
   options,
-  arrayFormat.
+  arrayFormat,
   abortSignal
 } = {}) {
   const opts = {};

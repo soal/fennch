@@ -1,7 +1,7 @@
 import AbortablePromise from "./abortablePromise";
 import createResponse from "./fResponse";
 
-class Interceptors {
+class Interceptor {
   constructor(API, interceptableMethods = []) {
     this.interceptors = [];
 
@@ -36,7 +36,7 @@ class Interceptors {
     this.interceptors = [];
   }
 
-  private interceptedMethod(methodFn, ...args) {
+  interceptedMethod(methodFn, ...args) {
     // const { interceptors, API } = this;
     const reversedInterceptors = this.interceptors.slice().reverse();
 
@@ -104,4 +104,4 @@ class Interceptors {
   }
 }
 
-export default Interceptors;
+export default Interceptor;

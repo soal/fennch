@@ -1,5 +1,6 @@
 class AbortablePromise {
   constructor(executor, aborter = new AbortController()) {
+    this.abortController = aborter;
     if (executor instanceof Promise) {
       this.promise = executor;
     } else {
@@ -32,19 +33,19 @@ class AbortablePromise {
   }
 }
 
-AbortablePromise.prototype.resolve = function(aborter = null, data) {
+AbortablePromise.resolve = function(aborter = null, data) {
   return new AbortablePromise(Promise.resolve(data), aborter);
 };
 
-AbortablePromise.prototype.reject = function(aborter = null, err) {
+AbortablePromise.reject = function(aborter = null, err) {
   return new AbortablePromise(Promise.reject(err), aborter);
 };
 
-AbortablePromise.prototype.race = function(aborter = null, data) {
+AbortablePromise.race = function(aborter = null, data) {
   return new AbortablePromise(Promise.race(data), aborter);
 };
 
-AbortablePromise.prototype.all = function(aborter = null, data) {
+AbortablePromise.all = function(aborter = null, data) {
   return new AbortablePromise(Promise.all(data), aborter);
 };
 
