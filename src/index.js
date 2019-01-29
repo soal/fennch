@@ -77,7 +77,10 @@ export default function Fench(
 
   const setup = method => {
     return (abortSignal, pathOrRequest = "/", options = {}) => {
-      const request = prepareRequest(abortSignal, pathOrRequest, options);
+      const request = prepareRequest(abortSignal, pathOrRequest, {
+        ...options,
+        ...method
+      });
       return makeRequest(abortSignal, request);
     };
   };
@@ -109,4 +112,3 @@ export default function Fench(
 
   return fench;
 }
-
