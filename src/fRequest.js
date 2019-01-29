@@ -1,7 +1,4 @@
-// import urlJoin from "url-join";
 // import qs from "qs";
-
-const urlJoin = require("url-join");
 const qs = require("qs");
 
 export default function createRequest({
@@ -14,14 +11,9 @@ export default function createRequest({
 } = {}) {
   const opts = {};
   // Creating URI
-  const fullUri = urlJoin(
-    baseURI,
-    path,
-    `${
-      options.params ? "?" + qs.stringify(options.params, { arrayFormat }) : ""
-    }`
-  );
-
+  const fullUri = `${baseURI}${path}${
+    options.params ? "?" + qs.stringify(options.params, { arrayFormat }) : ""
+  }`;
   // Creating headers
   // remove any null or blank headers
   // (e.g. to automatically set Content-Type with `FormData` boundary)

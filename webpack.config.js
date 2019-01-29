@@ -17,12 +17,6 @@ module.exports = {
     libraryExport: "default"
   },
   externals: {
-    "url-join": {
-      commonjs: "url-join",
-      commonjs2: "url-join",
-      amd: "url-join",
-      root: "url-join"
-    },
     caseless: {
       commonjs: "caseless",
       commonjs2: "caseless",
