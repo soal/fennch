@@ -48,24 +48,6 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        // exclude: [
-        //   filepath => {
-        //     // check if this is something the user explicitly wants to transpile
-        //     if (
-        //       options.transpileDependencies.some(dep => {
-        //         if (typeof dep === "string") {
-        //           return filepath.includes(path.normalize(dep));
-        //         } else {
-        //           return filepath.match(dep);
-        //         }
-        //       })
-        //     ) {
-        //       return false;
-        //     }
-        //     // Don't transpile node_modules
-        //     return /node_modules/.test(filepath);
-        //   }
-        // ],
         use: [
           /* config.module.rule('ts').use('cache-loader') */
           {
@@ -141,11 +123,5 @@ module.exports = {
       }
     }),
     new CaseSensitivePathsPlugin()
-    /* config.plugin('fork-ts-checker') */
-    // new ForkTsCheckerWebpackPlugin({
-    //   tslint: true,
-    //   formatter: "codeframe",
-    //   checkSyntacticErrors: true
-    // })
   ]
 };
