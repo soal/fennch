@@ -44,20 +44,19 @@ export default function Fench(
   fench.timeout = opts.timeout || 0;
 
   const prepareRequest = (abortSignal, pathOrRequest = "/", options = {}) => {
-    if (options && (typeof options !== "object" || Array.isArray(options))) {
-      throw new TypeError("`options` must be an object");
-    }
-
-    options = {
-      ...fench.opts,
-      ...options
-    };
-
     let fRequest = null;
 
     if (pathOrRequest.headers) {
       fRequest = pathOrRequest;
     } else {
+      if (options && (typeof options !== "object" || Array.isArray(options))) {
+        throw new TypeError("`options` must be an object");
+      }
+
+      options = {
+        ...fench.opts,
+        ...options
+      };
       if (typeof pathOrRequest !== "string") {
         throw new TypeError("`path` must be a string");
       }
