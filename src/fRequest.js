@@ -10,9 +10,18 @@ export default function createRequest({
   abortSignal
 } = {}) {
   const opts = {};
+
+  if (options.params) {
+    opts.params = null;
+    Object.keys(options.params).forEach(key => {
+      if (options.params[key] !== null) {
+        opts.params[key] = options.params[key]
+      }
+    })
+  }
   // Creating URI
   const fullUri = `${baseURI}${path}${
-    options.params ? "?" + qs.stringify(options.params, { arrayFormat }) : ""
+    opts.params ? "?" + qs.stringify(opts.params, { arrayFormat }) : ""
   }`;
   // Creating headers
   // remove any null or blank headers
@@ -61,7 +70,7 @@ export default function createRequest({
     method: opts.method,
     mode: opts.mode,
     path,
-    params: options.params,
+    params: opts.params,
     raw: new Request(fullUri, opts),
     signal: opts.signal,
     url: fullUri
