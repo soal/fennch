@@ -1,13 +1,14 @@
 {
-  "name": "fench",
+  "name": "fennch",
   "version": "0.0.1",
   "description": "Modern fetch-based axios-like  HTTP client for the browser and node.js ",
   "keywords": [
     "fetch",
     "fench"
   ],
-  "main": "dist/fench.js",
+  "main": "dist/fennch.js",
   "module": "src/index.js",
+  "repository": "https://github.com/soal/fennch",
   "author": "soal <sorrow.about.alice@pm.me>",
   "license": "MIT",
   "scripts": {
