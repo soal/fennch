@@ -38,7 +38,16 @@ export default function createRequest({
     opts.method.toLowerCase() !== "get" &&
     opts.method.toLowerCase() !== "head"
   ) {
-    opts.body = options.body;
+    const isBinary = [
+      Blob,
+      FormData
+    ].reduce((acc, type) => options.body instanceof type)
+
+    if (isBinary) {
+      opts.body = options.body;
+    } else {
+      opts.body = JSON.stringify(options.body);
+    }
   }
 
   if (options.mode) {
@@ -58,3 +67,4 @@ export default function createRequest({
     url: fullUri
   };
 }
+

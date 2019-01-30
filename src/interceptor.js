@@ -16,7 +16,9 @@ class Interceptor {
 
     interceptableMethods.forEach(methodName => {
       const methodFn = API[methodName];
-      API[methodName] = (...args) => this.interceptedMethod(methodFn, ...args);
+      API[methodName] = (...args) => {
+        return this.interceptedMethod(methodFn, ...args);
+      }
     });
   }
 
@@ -37,7 +39,6 @@ class Interceptor {
   }
 
   interceptedMethod(methodFn, ...args) {
-    // const { interceptors, API } = this;
     const reversedInterceptors = this.interceptors.slice().reverse();
 
     const abortController = new AbortController();
@@ -57,7 +58,7 @@ class Interceptor {
 
     // Register methodFn call
     if (typeof methodFn === "function") {
-      promise = promise.then((...args) =>
+      promise = promise.then(() =>
         methodFn(promise.abortController.signal, ...args)
       );
     }
@@ -72,15 +73,13 @@ class Interceptor {
       }
     });
 
-    let timeout = 0;
+    let timeout = this.API.timeout;
 
     if (
       typeof args[args.length - 1] === "object" &&
       typeof args[args.length - 1].timeout === "number"
     ) {
       timeout = args[args.length - 1].timeout;
-    } else {
-      timeout = this.API.timeout;
     }
 
     if (timeout > 0) {
@@ -90,15 +89,16 @@ class Interceptor {
         }, timeout);
       });
 
-      return AbortablePromise.race(abortController, [promise, timer]).then(
-        value => value,
-        err => {
-          if (err && err.message === "Timeout exceeded") {
-            promise.abort();
+      return AbortablePromise.race(abortController, [promise, timer])
+        .then(
+          value => value,
+          err => {
+            if (err && err.message === "Timeout exceeded") {
+              promise.abort();
+            }
+            return Promise.reject(err);
           }
-          return Promise.reject(err);
-        }
-      );
+        );
     }
     return promise;
   }

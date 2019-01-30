@@ -33,20 +33,20 @@ class AbortablePromise {
   }
 }
 
-AbortablePromise.resolve = function(aborter = null, data) {
-  return new AbortablePromise(Promise.resolve(data), aborter);
+AbortablePromise.resolve = function(aborter = null, ...args) {
+  return new AbortablePromise(Promise.resolve(...args), aborter);
 };
 
 AbortablePromise.reject = function(aborter = null, err) {
   return new AbortablePromise(Promise.reject(err), aborter);
 };
 
-AbortablePromise.race = function(aborter = null, data) {
-  return new AbortablePromise(Promise.race(data), aborter);
+AbortablePromise.race = function(aborter = null, ...args) {
+  return new AbortablePromise(Promise.race(...args), aborter);
 };
 
-AbortablePromise.all = function(aborter = null, data) {
-  return new AbortablePromise(Promise.all(data), aborter);
+AbortablePromise.all = function(aborter = null, ...args) {
+  return new AbortablePromise(Promise.all(...args), aborter);
 };
 
 export default AbortablePromise;

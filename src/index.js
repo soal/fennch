@@ -27,9 +27,10 @@ export default function Fennch(
   fetchImpl = null
 ) {
   const fennch = {
-    opts,
-    fetch: fetchImpl || fetch.bind(global)
+    opts
   };
+
+  const fetch = fetchImpl || global.fetch
 
   Object.defineProperty(fennch, "parseErr", {
     enumerable: false,
@@ -40,8 +41,8 @@ export default function Fennch(
       )
   });
 
-  fennch.opts.arrayFormat = opts.arrayFormat;
-  fennch.timeout = opts.timeout || 0;
+  // fennch.opts.arrayFormat = opts.arrayFormat;
+  // fennch.timeout = opts.timeout || 0;
 
   const prepareRequest = (abortSignal, pathOrRequest = "/", options = {}) => {
     let fRequest = null;
@@ -87,7 +88,7 @@ export default function Fennch(
   const makeRequest = (abortSignal, fRequest) => {
     return new Promise(async (resolve, reject) => {
       try {
-        const rawResponse = await fennch.fetch(fRequest.raw);
+        const rawResponse = await fetch(fRequest.raw);
         const fResponse = await createResponse(rawResponse, fRequest);
 
         resolve(fResponse);
