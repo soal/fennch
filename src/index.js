@@ -13,7 +13,7 @@ const methods = [
   "patch"
 ];
 
-export default function Fench(
+export default function Fennch(
   opts = {
     parseErr: null,
     headers: {},
@@ -26,12 +26,12 @@ export default function Fench(
   },
   fetchImpl = null
 ) {
-  const fench = {
+  const fennch = {
     opts,
     fetch: fetchImpl || fetch.bind(global)
   };
 
-  Object.defineProperty(fench, "parseErr", {
+  Object.defineProperty(fennch, "parseErr", {
     enumerable: false,
     value:
       opts.parseErr ||
@@ -40,8 +40,8 @@ export default function Fench(
       )
   });
 
-  fench.opts.arrayFormat = opts.arrayFormat;
-  fench.timeout = opts.timeout || 0;
+  fennch.opts.arrayFormat = opts.arrayFormat;
+  fennch.timeout = opts.timeout || 0;
 
   const prepareRequest = (abortSignal, pathOrRequest = "/", options = {}) => {
     let fRequest = null;
@@ -54,7 +54,7 @@ export default function Fench(
       }
 
       options = {
-        ...fench.opts,
+        ...fennch.opts,
         ...options
       };
       if (typeof pathOrRequest !== "string") {
@@ -62,11 +62,11 @@ export default function Fench(
       }
 
       fRequest = createRequest({
-        baseURI: fench.opts.baseURI,
-        globalHeaders: fench.opts.headers,
+        baseURI: fennch.opts.baseURI,
+        globalHeaders: fennch.opts.headers,
         path: pathOrRequest,
         options,
-        arrayFormat: fench.opts.arrayFormat,
+        arrayFormat: fennch.opts.arrayFormat,
         abortSignal
       });
     }
@@ -78,7 +78,7 @@ export default function Fench(
     return (abortSignal, pathOrRequest = "/", options = {}) => {
       const request = prepareRequest(abortSignal, pathOrRequest, {
         ...options,
-        ...method
+        method
       });
       return makeRequest(abortSignal, request);
     };
@@ -87,7 +87,7 @@ export default function Fench(
   const makeRequest = (abortSignal, fRequest) => {
     return new Promise(async (resolve, reject) => {
       try {
-        const rawResponse = await fench.fetch(fRequest.raw);
+        const rawResponse = await fennch.fetch(fRequest.raw);
         const fResponse = await createResponse(rawResponse, fRequest);
 
         resolve(fResponse);
@@ -98,16 +98,16 @@ export default function Fench(
     });
   };
 
-  fench.req = (abortSignal, request) => {
+  fennch.req = (abortSignal, request) => {
     return makeRequest(abortSignal, request);
   };
 
   methods.forEach(method => {
-    fench[method] = setup(method);
+    fennch[method] = setup(method);
   });
 
   // interceptor should be initialized after methods setup
-  fench.interceptor = new Interceptor(fench, [...methods, "req"]);
+  fennch.interceptor = new Interceptor(fennch, [...methods, "req"]);
 
-  return fench;
+  return fennch;
 }
