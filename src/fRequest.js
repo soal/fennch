@@ -11,14 +11,7 @@ export default function createRequest({
 } = {}) {
   const opts = {};
 
-  if (options.params) {
-    opts.params = null;
-    Object.keys(options.params).forEach(key => {
-      if (options.params[key] !== null) {
-        opts.params[key] = options.params[key]
-      }
-    })
-  }
+  opts.params = options.params;
   // Creating URI
   const fullUri = `${baseURI}${path}${
     opts.params ? "?" + qs.stringify(opts.params, { arrayFormat }) : ""
