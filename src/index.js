@@ -30,7 +30,7 @@ export default function Fennch(
     opts
   };
 
-  const fetch = fetchImpl || global.fetch
+  const fetch = fetchImpl || global.fetch;
 
   Object.defineProperty(fennch, "parseErr", {
     enumerable: false,
