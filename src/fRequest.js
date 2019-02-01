@@ -1,5 +1,5 @@
-// import qs from "qs";
-const qs = require("qs");
+import qs from "qs";
+// const qs = require("qs");
 
 export default function createRequest({
   baseURI,
@@ -19,7 +19,7 @@ export default function createRequest({
   // Creating headers
   // remove any null or blank headers
   // (e.g. to automatically set Content-Type with `FormData` boundary)
-  // const headers = new Headers();
+
   const headersObj = {};
   Object.entries(options.headers).forEach(([key, value]) => {
     if ((typeof value !== "undefined" && value !== null) || value !== "") {
@@ -55,6 +55,7 @@ export default function createRequest({
   if (options.mode) {
     opts.mode = options.mode;
   }
+  opts.timeout = options.timeout;
 
   opts.signal = abortSignal;
 
@@ -62,6 +63,7 @@ export default function createRequest({
     headers: opts.headers,
     method: opts.method,
     mode: opts.mode,
+    timeout: opts.timeout,
     path,
     params: opts.params,
     raw: new Request(fullUri, opts),

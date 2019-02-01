@@ -1,4 +1,5 @@
 import Interceptor from "./interceptor.js";
+import AbortablePromise from "./abortablePromise";
 import createRequest from "./fRequest.js";
 import createResponse from "./fResponse.js";
 
@@ -31,6 +32,8 @@ export default function Fennch(
   };
 
   const fetch = fetchImpl || global.fetch;
+
+  fennch.interceptor = Interceptor();
 
   Object.defineProperty(fennch, "parseErr", {
     enumerable: false,
@@ -72,32 +75,57 @@ export default function Fennch(
     return fRequest;
   };
 
-  const setup = method => {
-    return (abortSignal, pathOrRequest = "/", options = {}) => {
-      const request = prepareRequest(abortSignal, pathOrRequest, {
-        ...options,
-        method
-      });
-      return makeRequest(abortSignal, request);
-    };
-  };
-
-  const makeRequest = (abortSignal, fRequest) => {
-    return new Promise(async (resolve, reject) => {
+  const makeRequest = (abortController, fRequest) => {
+    const promise = new AbortablePromise(async (resolve, reject) => {
       try {
+        fRequest = await fennch.interceptor.interceptRequest(abortController, fRequest);
         const rawResponse = await fetch(fRequest.raw);
-        const fResponse = await createResponse(rawResponse, fRequest);
+        let fResponse = await createResponse(rawResponse, fRequest);
+        fResponse = await fennch.interceptor.interceptResponse(abortController, fResponse);
 
-        if (fResponse.err) {
-          reject(fResponse);
-        } else {
-          resolve(fResponse);
-        }
+        resolve(fResponse);
       } catch (err) {
         const fResponse = await createResponse(err, fRequest);
         reject(fResponse);
       }
-    });
+    }, abortController);
+
+    const timeout = fRequest.timeout || fennch.opts.timeout;
+
+    if (timeout > 0) {
+      let timerId = null
+      const timer = new Promise((resolve, reject) => {
+        timerId = setTimeout(() => {
+          clearTimeout(timerId)
+          reject(new Error("Timeout exceeded"));
+        }, timeout);
+      });
+
+      return AbortablePromise.race(abortController, [promise, timer])
+        .then(
+          value => {
+            return value
+          },
+          err => {
+            if (err && err.message === "Timeout exceeded") {
+              promise.abort();
+            }
+            return Promise.reject(err);
+          }
+        )
+    }
+    return promise
+  };
+
+  const setup = method => {
+    return (pathOrRequest = "/", options = {}) => {
+      const abortController = new AbortController();
+      const request = prepareRequest(abortController.signal, pathOrRequest, {
+        ...options,
+        method
+      });
+      return makeRequest(abortController, request);
+    };
   };
 
   fennch.req = (abortSignal, request) => {
@@ -107,9 +135,6 @@ export default function Fennch(
   methods.forEach(method => {
     fennch[method] = setup(method);
   });
-
-  // interceptor should be initialized after methods setup
-  fennch.interceptor = new Interceptor(fennch, [...methods, "req"]);
 
   return fennch;
 }
