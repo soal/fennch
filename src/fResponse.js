@@ -97,9 +97,6 @@ export default async function createResponse(rawResponse, fRequest) {
       rawResponse.headers.get("Content-Type")
     );
 
-    console.log('Error: ', err);
-    console.log('Body: ', body);
-
     if (err) {
       fResponse.err = err;
     }

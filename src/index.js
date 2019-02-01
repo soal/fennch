@@ -41,9 +41,6 @@ export default function Fennch(
       )
   });
 
-  // fennch.opts.arrayFormat = opts.arrayFormat;
-  // fennch.timeout = opts.timeout || 0;
-
   const prepareRequest = (abortSignal, pathOrRequest = "/", options = {}) => {
     let fRequest = null;
 
