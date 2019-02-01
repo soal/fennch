@@ -90,8 +90,6 @@ export default async function createResponse(rawResponse, fRequest) {
       fResponse.headers[key] = value;
     }
 
-    console.log('RawResponse: ', rawResponse)
-
     const { body, err } = await parseResponse(
       rawResponse,
       rawResponse.headers.get("Content-Type")
