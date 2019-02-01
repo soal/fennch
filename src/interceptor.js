@@ -48,7 +48,7 @@ class Interceptor {
     this.interceptors.forEach(({ request, requestError }) => {
       if (typeof request === "function") {
         promise = promise.then((...args) =>
-          request(promise.abortController.signal, ...args)
+          request(...args)
         );
       }
       if (typeof requestError === "function") {
