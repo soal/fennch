@@ -91,7 +91,11 @@ export default function Fennch(
         const rawResponse = await fetch(fRequest.raw);
         const fResponse = await createResponse(rawResponse, fRequest);
 
-        resolve(fResponse);
+        if (fResponse.err) {
+          reject(fResponse);
+        } else {
+          resolve(fResponse);
+        }
       } catch (err) {
         const fResponse = await createResponse(err, fRequest);
         reject(fResponse);

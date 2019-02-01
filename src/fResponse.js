@@ -30,25 +30,29 @@ async function parseResponse(res, contentType) {
           body = JSON.parse(body);
         }
 
-        // attempt to use better and human-friendly error messages
-        if (typeof body === "object" && typeof body.message === "string") {
-          err = new Error(body.message);
-        } else if (
-          !Array.isArray(body) &&
-          // attempt to utilize Stripe-inspired error messages
-          typeof body.error === "object"
-        ) {
-          if (body.error.message) {
-            err = new Error(body.error.message);
-          }
-          if (body.error.stack) {
-            err.stack = body.error.stack;
-          }
-          if (body.error.code) {
-            err.code = body.error.code;
-          }
-          if (body.error.param) {
-            err.param = body.error.param;
+        if (typeof body === "object") {
+          // attempt to use better and human-friendly error messages
+          if (typeof body.message === "string") {
+            err = new Error(body.message);
+          } else if (
+            // attempt to utilize Stripe-inspired error messages
+            !Array.isArray(body) &&
+            body.error
+          ) {
+            if (body.error.message) {
+              err = new Error(body.error.message);
+            }
+            if (body.error.stack) {
+              err.stack = body.error.stack;
+            }
+            if (body.error.code) {
+              err.code = body.error.code;
+            }
+            if (body.error.param) {
+              err.param = body.error.param;
+            }
+          } else if (body.errors) {
+            err.errors = body.errors
           }
         }
       } catch (e) {
@@ -86,10 +90,15 @@ export default async function createResponse(rawResponse, fRequest) {
       fResponse.headers[key] = value;
     }
 
+    console.log('RawResponse: ', rawResponse)
+
     const { body, err } = await parseResponse(
       rawResponse,
       rawResponse.headers.get("Content-Type")
     );
+
+    console.log('Error: ', err);
+    console.log('Body: ', body);
 
     if (err) {
       fResponse.err = err;
