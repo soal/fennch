@@ -59,10 +59,12 @@ export default function createRequest({
 
   opts.abortController = abortController;
 
+  const raw = new Request(fullUri, opts)
+
   return {
-    headers: opts.headers,
-    method: opts.method,
-    mode: opts.mode,
+    headers: raw.headers,
+    method: raw.method,
+    mode: raw.mode,
     timeout: opts.timeout,
     path,
     params: opts.params,
