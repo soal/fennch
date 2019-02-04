@@ -7,7 +7,7 @@ export default function createRequest({
   path,
   options,
   arrayFormat,
-  abortSignal
+  abortController
 } = {}) {
   const opts = {};
 
@@ -57,7 +57,7 @@ export default function createRequest({
   }
   opts.timeout = options.timeout;
 
-  opts.signal = abortSignal;
+  opts.abortController = abortController;
 
   return {
     headers: opts.headers,

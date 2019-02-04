@@ -44,7 +44,7 @@ export default function Fennch(
       )
   });
 
-  const prepareRequest = (abortSignal, pathOrRequest = "/", options = {}) => {
+  const prepareRequest = (abortController, pathOrRequest = "/", options = {}) => {
     let fRequest = null;
 
     if (pathOrRequest.headers) {
@@ -68,7 +68,7 @@ export default function Fennch(
         path: pathOrRequest,
         options,
         arrayFormat: fennch.opts.arrayFormat,
-        abortSignal
+        abortController
       });
     }
 
@@ -120,7 +120,7 @@ export default function Fennch(
   const setup = method => {
     return (pathOrRequest = "/", options = {}) => {
       const abortController = new AbortController();
-      const request = prepareRequest(abortController.signal, pathOrRequest, {
+      const request = prepareRequest(abortController, pathOrRequest, {
         ...options,
         method
       });
@@ -128,8 +128,8 @@ export default function Fennch(
     };
   };
 
-  fennch.req = (abortSignal, request) => {
-    return makeRequest(abortSignal, request);
+  fennch.req = request => {
+    return makeRequest(request.abortController, request);
   };
 
   methods.forEach(method => {
