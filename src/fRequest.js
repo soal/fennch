@@ -53,8 +53,6 @@ function makeHeadersProxy(requestHeaders) {
   return proxy;
 }
 
-// console.log(makeHeadersProxy);
-
 function makeProxy(rawRequest, abortController) {
   return new Proxy(rawRequest, {
     get(target, key) {
@@ -174,4 +172,4 @@ export default function createRequest(config) {
 
   return fRequest;
 }
-console.log(createRequest)
+
