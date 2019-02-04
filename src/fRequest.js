@@ -68,7 +68,7 @@ export default function createRequest({
     timeout: opts.timeout,
     path,
     params: opts.params,
-    raw: new Request(fullUri, opts),
+    raw,
     signal: opts.signal,
     url: fullUri
   };
