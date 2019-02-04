@@ -104,6 +104,5 @@ export default async function createResponse(rawResponse, fRequest) {
     fResponse.err = rawResponse
     statusText: rawResponse.message || null
   }
-
   return fResponse;
 }

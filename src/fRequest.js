@@ -1,76 +1,177 @@
 import qs from "qs";
-// const qs = require("qs");
 
-export default function createRequest({
-  baseURI,
-  globalHeaders,
-  path,
-  options,
-  arrayFormat,
-  abortController
-} = {}) {
-  const opts = {};
+function makeHeadersProxy(requestHeaders) {
+  const proxy = new Proxy(requestHeaders, {
+    get(headers, key) {
+      if (key === "raw") return requestHeaders;
 
-  opts.params = options.params;
-  // Creating URI
-  const fullUri = `${baseURI}${path}${
-    opts.params ? "?" + qs.stringify(opts.params, { arrayFormat }) : ""
-  }`;
-  // Creating headers
-  // remove any null or blank headers
-  // (e.g. to automatically set Content-Type with `FormData` boundary)
+      if (key === Symbol.iterator) {
+        return headers[Symbol.iterator].bind(headers);
+      } else if (typeof headers[key] === 'function') {
+        return new Proxy(headers[key], {
+          apply(method, thisArg, args) {
+            return method.call(headers, ...args);
+          }
+        })
+      } else if (headers.has(key)) {
+        return headers.get(key);
+      } else {
+        return headers[key];
+      }
+    },
 
-  const headersObj = {};
-  Object.entries(options.headers).forEach(([key, value]) => {
-    if ((typeof value !== "undefined" && value !== null) || value !== "") {
-      headersObj[key] = value;
+    set(headers, key, value) {
+      // NOTE: this prevents to add several headers with same key
+      if (headers.has(key)) {
+        headers.set(key, value);
+      } else {
+        headers.append(key, value);
+      }
+      return true;
+    },
+
+    deleteProperty(headers, key) {
+      if (headers.has(key)) {
+        headers.delete(key);
+      }
+      return true;
+    },
+
+    has(headers, key) {
+      return headers.has(key);
+    },
+
+    ownKeys(headers) {
+      return headers.keys();
+    },
+
+    enumerate(headers) {
+      return headers.keys()
     }
   });
-  opts.headers = new Headers(headersObj);
 
-  if (options.method) {
-    opts.method =
-      options.method === "del" ? "DELETE" : options.method.toUpperCase();
-  } else {
-    opts.method = "GET";
+  return proxy;
+}
+
+// console.log(makeHeadersProxy);
+
+function makeProxy(rawRequest, abortController) {
+  return new Proxy(rawRequest, {
+    get(target, key) {
+      if (typeof target[key] === 'function') {
+        return new Proxy(target[key], {
+          apply(method, thisArg, args) {
+            return method.call(target, ...args);
+          }
+        })
+      }
+
+      switch (key) {
+        case "raw":
+          return rawRequest.raw ? rawRequest.raw : rawRequest;
+
+        case "headers":
+          return makeHeadersProxy(target[key]);
+
+        case "abortController":
+          return abortController;
+
+        case "params":
+          const qstring = target.url.split("?")[1];
+          if (qstring) {
+            return qs.parse(qstring);
+          } else {
+            return null;
+          }
+
+        case "body":
+          let body = target.body;
+          try {
+            body = JSON.parse(target.body);
+            return body
+          } catch(err) {
+            return body
+          }
+
+        default:
+          return target[key]
+      }
+    },
+
+    set(target, prop, value) {
+      switch (prop) {
+        case "headers":
+          for (let key of target.headers.keys()) {
+            target.headers.delete(key)
+          }
+          if (value && typeof value === "object") {
+            Object.entries(value).forEach(([key, value]) => {
+              target.headers.append(key, value);
+            })
+          }
+          return true;
+
+        default:
+          target[prop] = value;
+      }
+    }
+  })
+}
+export default function createRequest(config) {
+  if (config instanceof Request) {
+    if (config.raw) return config;
+    return makeProxy(config);
   }
 
-  // Creating body if nedeed
-  if (
-    opts.method.toLowerCase() !== "get" &&
-    opts.method.toLowerCase() !== "head"
-  ) {
+  let {
+    baseUri,
+    path,
+    mode,
+    method,
+    globalHeaders,
+    headers,
+    params,
+    body,
+    arrayFormat,
+    abortController
+  } = config;
+
+  const fullUri = `${baseUri}${path}${
+    params ? "?" + qs.stringify(params, { arrayFormat }) : ""
+  }`;
+
+  if (method) {
+    method = method === "del" ? "DELETE" : method.toUpperCase();
+  } else {
+    method = "GET";
+  }
+
+  if (method !== "GET" && method !== "HEAD") {
     const isBinary = [
       Blob,
       FormData
-    ].reduce((acc, type) => options.body instanceof type)
+    ].reduce((acc, type) => body instanceof type)
 
     if (isBinary) {
-      opts.body = options.body;
+      body = body;
     } else {
-      opts.body = JSON.stringify(options.body);
+      body = JSON.stringify(body);
     }
   }
 
-  if (options.mode) {
-    opts.mode = options.mode;
-  }
-  opts.timeout = options.timeout;
+  const rawRequest = new Request(fullUri, {
+    method,
+    body,
+    mode,
+    signal: abortController.signal
+  });
 
-  opts.abortController = abortController;
+  const fRequest = makeProxy(rawRequest, abortController);
 
-  const raw = new Request(fullUri, opts)
+  let allHeaders = Object.assign({}, globalHeaders, headers)
 
-  return {
-    headers: raw.headers,
-    method: raw.method,
-    mode: raw.mode,
-    timeout: opts.timeout,
-    path,
-    params: opts.params,
-    raw,
-    signal: opts.signal,
-    url: fullUri
-  };
+  fRequest.headers = allHeaders;
+
+  return fRequest;
 }
-
+console.log(createRequest)

@@ -18,9 +18,8 @@ export default function Interceptor() {
       this.interceptors = [];
     },
 
-    interceptRequest(abortController, fRequest) {
-      let promise = AbortablePromise.resolve(abortController, fRequest);
-
+    interceptRequest(fRequest) {
+      let promise = AbortablePromise.resolve(fRequest.abortController, fRequest);
       this.interceptors.forEach(({ request, requestError } = {}) => {
         if (typeof request === "function") {
           promise = promise.then(req =>

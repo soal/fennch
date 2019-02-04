@@ -1,7 +1,7 @@
 import Interceptor from "./interceptor.js";
 import AbortablePromise from "./abortablePromise";
-import createRequest from "./fRequest.js";
 import createResponse from "./fResponse.js";
+import createRequest from "./fRequest.js";
 
 const methods = [
   "get",
@@ -18,12 +18,10 @@ export default function Fennch(
   opts = {
     parseErr: null,
     headers: {},
-    baseURI: "",
+    baseUri: "",
     arrayFormat: "indices",
     auth: {},
-    timeout: 0,
-    body: {},
-    signal: null
+    timeout: 0
   },
   fetchImpl = null
 ) {
@@ -44,51 +42,51 @@ export default function Fennch(
       )
   });
 
-  const prepareRequest = (abortController, pathOrRequest = "/", options = {}) => {
-    let fRequest = null;
-
-    if (pathOrRequest.headers) {
-      fRequest = pathOrRequest;
-    } else {
-      if (options && (typeof options !== "object" || Array.isArray(options))) {
-        throw new TypeError("`options` must be an object");
-      }
-
-      options = {
-        ...fennch.opts,
-        ...options
-      };
-      if (typeof pathOrRequest !== "string") {
-        throw new TypeError("`path` must be a string");
-      }
-
-      fRequest = createRequest({
-        baseURI: fennch.opts.baseURI,
-        globalHeaders: fennch.opts.headers,
-        path: pathOrRequest,
-        options,
-        arrayFormat: fennch.opts.arrayFormat,
-        abortController
-      });
+  const prepareRequest = (path = "/", options = {}) => {
+    if (options && (typeof options !== "object" || Array.isArray(options))) {
+      throw new TypeError("`options` must be an object");
     }
+
+    options = {
+      ...fennch.opts,
+      ...options
+    };
+    if (typeof path !== "string") {
+      throw new TypeError("`path` must be a string");
+    }
+
+    const abortController = new AbortController();
+
+    const fRequest = new createRequest({
+      baseUri: fennch.opts.baseUri,
+      path,
+      mode: options.mode,
+      method: options.method,
+      globalHeaders: fennch.opts.headers,
+      headers: options.headers,
+      params: options.params,
+      body: options.body,
+      arrayFormat: fennch.opts.arrayFormat,
+      abortController
+    });
 
     return fRequest;
   };
 
-  const makeRequest = (abortController, fRequest) => {
+  const makeRequest = fRequest => {
     const promise = new AbortablePromise(async (resolve, reject) => {
       try {
-        fRequest = await fennch.interceptor.interceptRequest(abortController, fRequest);
+        fRequest = await fennch.interceptor.interceptRequest(fRequest);
         const rawResponse = await fetch(fRequest.raw);
         let fResponse = await createResponse(rawResponse, fRequest);
-        fResponse = await fennch.interceptor.interceptResponse(abortController, fResponse);
+        fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
 
         resolve(fResponse);
       } catch (err) {
         const fResponse = await createResponse(err, fRequest);
         reject(fResponse);
       }
-    }, abortController);
+    }, fRequest.abortController);
 
     const timeout = fRequest.timeout || fennch.opts.timeout;
 
@@ -101,7 +99,7 @@ export default function Fennch(
         }, timeout);
       });
 
-      return AbortablePromise.race(abortController, [promise, timer])
+      return AbortablePromise.race(fRequest.abortController, [promise, timer])
         .then(
           value => {
             return value
@@ -118,19 +116,16 @@ export default function Fennch(
   };
 
   const setup = method => {
-    return (pathOrRequest = "/", options = {}) => {
-      const abortController = new AbortController();
-      const request = prepareRequest(abortController, pathOrRequest, {
+    return (path = "/", options = {}) => {
+      const request = prepareRequest(path, {
         ...options,
         method
       });
-      return makeRequest(abortController, request);
+      return fennch.req(request)
     };
   };
 
-  fennch.req = request => {
-    return makeRequest(request.abortController, request);
-  };
+  fennch.req = request => makeRequest(request);
 
   methods.forEach(method => {
     fennch[method] = setup(method);
