@@ -21,7 +21,7 @@ async function parseResponse(rawResponse) {
 }
 
 export default async function createResponse(rawResponse, fRequest) {
-  const { body, error } = await parseResponse(rawResponse);
+  let { body, error } = await parseResponse(rawResponse);
 
   return new Proxy(rawResponse, {
     get(target, key) {
@@ -42,5 +42,13 @@ export default async function createResponse(rawResponse, fRequest) {
           return target[key];
       }
     },
+
+    set (target, key, value) {
+      if (key === "body") {
+        body = value;
+        return true;
+      }
+      return false;
+    }
   });
 }
