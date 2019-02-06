@@ -79,7 +79,10 @@ export default function Fennch(
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
         const rawResponse = await fetch(fRequest.raw);
         let fResponse = await createResponse(rawResponse, fRequest);
-        fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
+        fResponse = await fennch.interceptor.interceptResponse(
+          fRequest.abortController,
+          fResponse
+        );
 
         resolve(fResponse);
       } catch (err) {
@@ -91,28 +94,30 @@ export default function Fennch(
     const timeout = fRequest.timeout || fennch.opts.timeout;
 
     if (timeout > 0) {
-      let timerId = null
+      let timerId = null;
       const timer = new Promise((resolve, reject) => {
         timerId = setTimeout(() => {
-          clearTimeout(timerId)
+          clearTimeout(timerId);
           reject(new Error("Timeout exceeded"));
         }, timeout);
       });
 
-      return AbortablePromise.race(fRequest.abortController, [promise, timer])
-        .then(
-          value => {
-            return value
-          },
-          err => {
-            if (err && err.message === "Timeout exceeded") {
-              promise.abort();
-            }
-            return Promise.reject(err);
+      return AbortablePromise.race(fRequest.abortController, [
+        promise,
+        timer
+      ]).then(
+        value => {
+          return value;
+        },
+        err => {
+          if (err && err.message === "Timeout exceeded") {
+            promise.abort();
           }
-        )
+          return Promise.reject(err);
+        }
+      );
     }
-    return promise
+    return promise;
   };
 
   const setup = method => {
@@ -121,7 +126,7 @@ export default function Fennch(
         ...options,
         method
       });
-      return fennch.req(request)
+      return fennch.req(request);
     };
   };
 
