@@ -1,10 +1,10 @@
 {
   "name": "fennch",
   "version": "0.0.1",
-  "description": "Modern fetch-based axios-like  HTTP client for the browser and node.js ",
+  "description": "Modern fetch-based HTTP client for the browser and node.js ",
   "keywords": [
     "fetch",
-    "fench"
+    "fennch"
   ],
   "main": "dist/fennch.js",
   "module": "src/index.js",
@@ -32,7 +32,6 @@
     "webpack-cli": "^3.2.1"
   },
   "dependencies": {
-    "caseless": "^0.12.0",
     "qs": "^6.6.0"
   }
 }
