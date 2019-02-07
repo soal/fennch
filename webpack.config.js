@@ -9,8 +9,8 @@ module.exports = {
   // context: path.resolve(__dirname),
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "fench.js",
-    library: "Fench",
+    filename: "fennch.js",
+    library: "fennch",
     umdNamedDefine: true,
     globalObject: "typeof self !== 'undefined' ? self : this",
     libraryTarget: "commonjs",
