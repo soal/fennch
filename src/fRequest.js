@@ -173,7 +173,7 @@ export default function createRequest(config) {
     signal: abortController.signal
   });
 
-  const fRequest = makeProxy(rawRequest, abortController);
+  const fRequest = makeProxy(rawRequest.clone(), abortController);
 
   let allHeaders = Object.assign({}, globalHeaders, headers);
 
