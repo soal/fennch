@@ -61,7 +61,7 @@ function makeHeadersProxy(requestHeaders) {
   return proxy;
 }
 
-function makeProxy(rawRequest, abortController) {
+function makeProxy(rawRequest, body, abortController) {
   return new Proxy(rawRequest, {
     get(target, key) {
       if (typeof target[key] === "function") {
@@ -94,13 +94,7 @@ function makeProxy(rawRequest, abortController) {
           }
 
         case "body":
-          let body = target.body;
-          try {
-            body = JSON.parse(target.body);
-            return body;
-          } catch (err) {
-            return body;
-          }
+          return body;
 
         default:
           return target[key];
@@ -129,13 +123,14 @@ function makeProxy(rawRequest, abortController) {
 export default function createRequest(config) {
   let fRequest = null;
   if (config instanceof Request) {
+    console.log("BODY: ", config.body);
     const rawRequest = new Request(config.url, {
       method: config.method,
       body: config.body,
       mode: config.mode,
       signal: config.abortController.signal
     });
-    fRequest = makeProxy(rawRequest, config.abortController);
+    fRequest = makeProxy(rawRequest, config.body, config.abortController);
 
     fRequest.headers = config.headers;
   } else {
@@ -181,7 +176,7 @@ export default function createRequest(config) {
       signal: abortController.signal
     });
 
-    fRequest = makeProxy(rawRequest, abortController);
+    fRequest = makeProxy(rawRequest, body, abortController);
 
     let allHeaders = Object.assign({}, globalHeaders, headers);
 
