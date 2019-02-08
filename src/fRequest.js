@@ -128,7 +128,13 @@ function makeProxy(rawRequest, abortController) {
 }
 export default function createRequest(config) {
   if (config instanceof Request) {
-    return makeProxy(config.clone(), config.abortController);
+    const rawRequest = new Request(config.url, {
+      method: config.method,
+      body: config.body,
+      mode: config.mode,
+      signal: config.abortController.signal
+    });
+    return makeProxy(rawRequest, config.abortController);
   }
 
   let {
