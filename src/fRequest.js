@@ -127,6 +127,7 @@ function makeProxy(rawRequest, abortController) {
   });
 }
 export default function createRequest(config) {
+  let fRequest = null;
   if (config instanceof Request) {
     const rawRequest = new Request(config.url, {
       method: config.method,
@@ -134,56 +135,58 @@ export default function createRequest(config) {
       mode: config.mode,
       signal: config.abortController.signal
     });
-    return makeProxy(rawRequest, config.abortController);
-  }
+    fRequest = makeProxy(rawRequest, config.abortController);
 
-  let {
-    baseUri,
-    path,
-    mode,
-    method,
-    globalHeaders,
-    headers,
-    params,
-    body,
-    arrayFormat,
-    abortController
-  } = config;
-
-  const fullUri = `${baseUri}${path}${
-    params ? "?" + qs.stringify(params, { arrayFormat }) : ""
-  }`;
-
-  if (method) {
-    method = method === "del" ? "DELETE" : method.toUpperCase();
+    fRequest.headers = config.headers;
   } else {
-    method = "GET";
-  }
+    let {
+      baseUri,
+      path,
+      mode,
+      method,
+      globalHeaders,
+      headers,
+      params,
+      body,
+      arrayFormat,
+      abortController
+    } = config;
 
-  if (method !== "GET" && method !== "HEAD") {
-    const isBinary = [Blob, FormData].reduce(
-      (acc, type) => body instanceof type
-    );
+    const fullUri = `${baseUri}${path}${
+      params ? "?" + qs.stringify(params, { arrayFormat }) : ""
+    }`;
 
-    if (isBinary) {
-      body = body;
+    if (method) {
+      method = method === "del" ? "DELETE" : method.toUpperCase();
     } else {
-      body = JSON.stringify(body);
+      method = "GET";
     }
+
+    if (method !== "GET" && method !== "HEAD") {
+      const isBinary = [Blob, FormData].reduce(
+        (acc, type) => body instanceof type
+      );
+
+      if (isBinary) {
+        body = body;
+      } else {
+        body = JSON.stringify(body);
+      }
+    }
+
+    const rawRequest = new Request(fullUri, {
+      method,
+      body,
+      mode,
+      signal: abortController.signal
+    });
+
+    fRequest = makeProxy(rawRequest, abortController);
+
+    let allHeaders = Object.assign({}, globalHeaders, headers);
+
+    fRequest.headers = allHeaders;
   }
-
-  const rawRequest = new Request(fullUri, {
-    method,
-    body,
-    mode,
-    signal: abortController.signal
-  });
-
-  const fRequest = makeProxy(rawRequest.clone(), abortController);
-
-  let allHeaders = Object.assign({}, globalHeaders, headers);
-
-  fRequest.headers = allHeaders;
 
   return fRequest;
 }
