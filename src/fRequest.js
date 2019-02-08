@@ -1,12 +1,12 @@
 import qs from "qs";
 
-function makeCloneProxy(cloneFunc) {
-  return new Proxy(cloneFunc, {
-    apply(target, thisArg, args) {
-      console.log(target, thisArg, args)
-    }
-  })
-}
+// function makeCloneProxy(cloneFunc) {
+//   return new Proxy(cloneFunc, {
+//     apply(target, thisArg, args) {
+//       console.log(target, thisArg, args)
+//     }
+//   })
+// }
 
 function makeHeadersProxy(requestHeaders) {
   const proxy = new Proxy(requestHeaders, {
@@ -15,12 +15,12 @@ function makeHeadersProxy(requestHeaders) {
 
       if (key === Symbol.iterator) {
         return headers[Symbol.iterator].bind(headers);
-      } else if (typeof headers[key] === 'function') {
+      } else if (typeof headers[key] === "function") {
         return new Proxy(headers[key], {
           apply(method, thisArg, args) {
             return method.call(headers, ...args);
           }
-        })
+        });
       } else if (headers.has(key)) {
         return headers.get(key);
       } else {
@@ -54,7 +54,7 @@ function makeHeadersProxy(requestHeaders) {
     },
 
     enumerate(headers) {
-      return headers.keys()
+      return headers.keys();
     }
   });
 
@@ -64,12 +64,12 @@ function makeHeadersProxy(requestHeaders) {
 function makeProxy(rawRequest, abortController) {
   return new Proxy(rawRequest, {
     get(target, key) {
-      if (typeof target[key] === 'function') {
+      if (typeof target[key] === "function") {
         return new Proxy(target[key], {
           apply(method, thisArg, args) {
             return method.call(target, ...args);
           }
-        })
+        });
       }
 
       switch (key) {
@@ -79,8 +79,8 @@ function makeProxy(rawRequest, abortController) {
         case "headers":
           return makeHeadersProxy(target[key]);
 
-        case "clone":
-          return makeCloneProxy(target.clone)
+        // case "clone":
+        //   return makeCloneProxy(target.clone)
 
         case "abortController":
           return abortController;
@@ -97,13 +97,13 @@ function makeProxy(rawRequest, abortController) {
           let body = target.body;
           try {
             body = JSON.parse(target.body);
-            return body
-          } catch(err) {
-            return body
+            return body;
+          } catch (err) {
+            return body;
           }
 
         default:
-          return target[key]
+          return target[key];
       }
     },
 
@@ -111,12 +111,12 @@ function makeProxy(rawRequest, abortController) {
       switch (prop) {
         case "headers":
           for (let key of target.headers.keys()) {
-            target.headers.delete(key)
+            target.headers.delete(key);
           }
           if (value && typeof value === "object") {
             Object.entries(value).forEach(([key, value]) => {
               target.headers.append(key, value);
-            })
+            });
           }
           return true;
 
@@ -124,11 +124,11 @@ function makeProxy(rawRequest, abortController) {
           target[prop] = value;
       }
     }
-  })
+  });
 }
 export default function createRequest(config) {
   if (config instanceof Request) {
-    return makeProxy(config.clone(), config.abortController)
+    return makeProxy(config.clone(), config.abortController);
   }
 
   let {
@@ -155,10 +155,9 @@ export default function createRequest(config) {
   }
 
   if (method !== "GET" && method !== "HEAD") {
-    const isBinary = [
-      Blob,
-      FormData
-    ].reduce((acc, type) => body instanceof type)
+    const isBinary = [Blob, FormData].reduce(
+      (acc, type) => body instanceof type
+    );
 
     if (isBinary) {
       body = body;
@@ -176,10 +175,9 @@ export default function createRequest(config) {
 
   const fRequest = makeProxy(rawRequest, abortController);
 
-  let allHeaders = Object.assign({}, globalHeaders, headers)
+  let allHeaders = Object.assign({}, globalHeaders, headers);
 
   fRequest.headers = allHeaders;
 
   return fRequest;
 }
-
