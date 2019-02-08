@@ -2,22 +2,26 @@ async function parseResponse(rawResponse) {
   let body = null;
   let error = null;
 
-  const contentType = rawResponse.headers.get("Content-Type");
+  if (rawResponse instanceof Response) {
+    const contentType = rawResponse.headers.get("Content-Type");
 
-  if (contentType && contentType.includes("application/json")) {
-    try {
-      if (typeof rawResponse.json === "function") {
-        body = await rawResponse.json();
-      } else {
-        body = await rawResponse.text();
-        body = JSON.parse(body);
+    if (contentType && contentType.includes("application/json")) {
+      try {
+        if (typeof rawResponse.json === "function") {
+          body = await rawResponse.json();
+        } else {
+          body = await rawResponse.text();
+          body = JSON.parse(body);
+        }
+      } catch (err) {
+        error = err;
       }
-    } catch (err) {
-      error = err;
     }
+  } else {
+    error = rawResponse;
   }
 
-  return { body, error }
+  return { body, error };
 }
 
 export default async function createResponse(rawResponse, fRequest) {
@@ -43,7 +47,7 @@ export default async function createResponse(rawResponse, fRequest) {
       }
     },
 
-    set (target, key, value) {
+    set(target, key, value) {
       if (key === "body") {
         body = value;
         return true;
