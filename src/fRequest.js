@@ -1,5 +1,13 @@
 import qs from "qs";
 
+function makeCloneProxy(cloneFunc) {
+  return new Proxy(cloneFunc, {
+    apply(target, thisArg, args) {
+      console.log(target, thisArg, args)
+    }
+  })
+}
+
 function makeHeadersProxy(requestHeaders) {
   const proxy = new Proxy(requestHeaders, {
     get(headers, key) {
@@ -70,6 +78,9 @@ function makeProxy(rawRequest, abortController) {
 
         case "headers":
           return makeHeadersProxy(target[key]);
+
+        case "clone":
+          return makeCloneProxy(target.clone)
 
         case "abortController":
           return abortController;
