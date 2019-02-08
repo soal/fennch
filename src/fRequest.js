@@ -1,13 +1,5 @@
 import qs from "qs";
 
-// function makeCloneProxy(cloneFunc) {
-//   return new Proxy(cloneFunc, {
-//     apply(target, thisArg, args) {
-//       console.log(target, thisArg, args)
-//     }
-//   })
-// }
-
 function makeHeadersProxy(requestHeaders) {
   const proxy = new Proxy(requestHeaders, {
     get(headers, key) {
@@ -123,8 +115,8 @@ function makeProxy(rawRequest, body, abortController) {
 export default function createRequest(config) {
   let fRequest = null;
   if (config instanceof Request) {
-    console.log("BODY: ", config.body);
     const rawRequest = new Request(config.url, {
+      headers: config.headers,
       method: config.method,
       body: config.body,
       mode: config.mode,
@@ -132,7 +124,7 @@ export default function createRequest(config) {
     });
     fRequest = makeProxy(rawRequest, config.body, config.abortController);
 
-    fRequest.headers = config.headers;
+    // fRequest.headers = config.headers;
   } else {
     let {
       baseUri,
