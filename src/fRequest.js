@@ -119,7 +119,9 @@ export default function createRequest(config) {
   if (config instanceof Request) {
     if (config.raw) {
       return makeProxy(config.raw.clone(), config.abortController)
-    };
+    } else {
+      return makeProxy(config.clone())
+    }
   }
 
   let {
