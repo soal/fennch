@@ -3,7 +3,12 @@ import qs from "qs";
 function makeHeadersProxy(requestHeaders) {
   const proxy = new Proxy(requestHeaders, {
     get(headers, key) {
-      if (key === "raw") return requestHeaders;
+      if (key === "raw") {
+        if (typeof requestHeaders.raw === "function") {
+          return requestHeaders.raw;
+        }
+        return requestHeaders;
+      }
 
       if (key === Symbol.iterator) {
         return headers[Symbol.iterator].bind(headers);
