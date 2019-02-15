@@ -101,7 +101,7 @@ function makeProxy(rawRequest, body, abortController) {
     set(target, prop, value) {
       switch (prop) {
         case "headers":
-          for (let key of Object.keys(target.headers)) {
+          for (let key of target.headers.keys()) {
             target.headers.delete(key);
           }
           if (value && typeof value === "object") {
