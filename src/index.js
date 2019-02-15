@@ -19,6 +19,7 @@ export default function Fennch(
     parseErr: null,
     headers: {},
     baseUri: "",
+    mode: "cors",
     arrayFormat: "indices",
     auth: {},
     timeout: 0
@@ -33,6 +34,7 @@ export default function Fennch(
 
   fennch.interceptor = Interceptor();
 
+  // TODO: Remove?
   Object.defineProperty(fennch, "parseErr", {
     enumerable: false,
     value:
