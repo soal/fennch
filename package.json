@@ -1,6 +1,6 @@
 {
   "name": "fennch",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Modern fetch-based HTTP client for the browser and node.js ",
   "keywords": [
     "fetch",
