@@ -5,7 +5,7 @@ function makeHeadersProxy(requestHeaders) {
     get(headers, key) {
       if (key === "raw") {
         if (typeof requestHeaders.raw === "function") {
-          return requestHeaders.raw;
+          return requestHeaders.raw.bind(headers);
         }
         return requestHeaders;
       }
