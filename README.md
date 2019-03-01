@@ -68,14 +68,14 @@ const MySuperComponent = {
   }
 };
 
-// I'm want make a request
+// I want make a request
 MySuperComponent.apiCall()
   .then(res => res)
   .catch(err => {
     console.log(err); // => 'Request aborted'
   });
 
-// Oh, wait, I change my mind!
+// Oh, wait, I changed my mind!
 MySuperComponent.handleUserAbort();
 ```
 

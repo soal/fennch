@@ -5,7 +5,7 @@ function makeHeadersProxy(requestHeaders) {
     get(headers, key) {
       if (key === "raw") {
         if (typeof requestHeaders.raw === "function") {
-          return requestHeaders.raw;
+          return requestHeaders.raw.bind(headers);
         }
         return requestHeaders;
       }
@@ -76,8 +76,8 @@ function makeProxy(rawRequest, body, abortController) {
         case "headers":
           return makeHeadersProxy(target[key]);
 
-        // case "clone":
-        //   return makeCloneProxy(target.clone)
+        case "abortController":
+          return abortController;
 
         case "abortController":
           return abortController;
