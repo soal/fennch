@@ -1,21 +1,42 @@
+function getType(contentType) {
+  if (contentType.includes("json")) {
+    return "json";
+  } else if (contentType.includes("text")) {
+    return "text";
+  }
+  return "blob";
+}
+
 async function parseResponse(rawResponse) {
   let body = null;
   let error = null;
 
   if (rawResponse instanceof Response) {
-    const contentType = rawResponse.headers.get("Content-Type");
-
-    if (contentType && contentType.includes("application/json")) {
-      try {
-        if (typeof rawResponse.json === "function") {
+    const type = getType(rawResponse.headers.get("Content-Type"));
+    switch (type) {
+      case "json":
+        try {
           body = await rawResponse.json();
-        } else {
-          body = await rawResponse.text();
-          body = JSON.parse(body);
+        } catch (err) {
+          error = err;
         }
-      } catch (err) {
-        error = err;
-      }
+        break;
+
+      case "text":
+        try {
+          body = await rawResponse.text();
+        } catch (err) {
+          error = err;
+        }
+        break;
+
+      default:
+        try {
+          body = await rawResponse.blob();
+        } catch (err) {
+          error = err;
+        }
+        break;
     }
   } else {
     error = rawResponse;
