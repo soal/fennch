@@ -12,6 +12,9 @@ async function parseResponse(rawResponse) {
   let error = null;
 
   if (rawResponse instanceof Response) {
+    if (rawResponse.status === 204 && rawResponse.ok) {
+      return { body, error }
+    }
     const type = getType(rawResponse.headers.get("Content-Type"));
     switch (type) {
       case "json":
