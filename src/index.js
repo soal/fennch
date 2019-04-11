@@ -140,3 +140,7 @@ export default function Fennch(
 
   return fennch;
 }
+
+export const APromise = AbortablePromise;
+export const createFResponse = createResponse;
+export const createFRequect = createRequest;

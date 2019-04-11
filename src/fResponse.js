@@ -13,7 +13,7 @@ async function parseResponse(rawResponse) {
 
   if (rawResponse instanceof Response) {
     if (rawResponse.status === 204 && rawResponse.ok) {
-      return { body, error }
+      return { body, error };
     }
     const type = getType(rawResponse.headers.get("Content-Type"));
     switch (type) {
