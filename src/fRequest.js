@@ -1,5 +1,11 @@
 import qs from "qs";
 
+/**
+ * Makes a headers proxy.
+ *
+ * @param      {<type>}  requestHeaders  The request headers
+ * @return     {Proxy}   { description_of_the_return_value }
+ */
 function makeHeadersProxy(requestHeaders) {
   const proxy = new Proxy(requestHeaders, {
     get(headers, key) {
@@ -58,6 +64,14 @@ function makeHeadersProxy(requestHeaders) {
   return proxy;
 }
 
+/**
+ * Makes a proxy.
+ *
+ * @param      {<type>}  rawRequest       The raw request
+ * @param      {<type>}  body             The body
+ * @param      {<type>}  abortController  The abort controller
+ * @return     {Proxy}   { description_of_the_return_value }
+ */
 function makeProxy(rawRequest, body, abortController) {
   return new Proxy(rawRequest, {
     get(target, key) {
@@ -117,6 +131,13 @@ function makeProxy(rawRequest, body, abortController) {
     }
   });
 }
+
+/**
+ * Creates a request.
+ *
+ * @param      {<type>}    config  The configuration
+ * @return     {Function}  { description_of_the_return_value }
+ */
 export default function createRequest(config) {
   let fRequest = null;
   if (config instanceof Request) {
@@ -130,22 +151,9 @@ export default function createRequest(config) {
     });
     fRequest = makeProxy(rawRequest, config.body, abortController);
   } else {
-    let {
-      baseUri,
-      path,
-      mode,
-      method,
-      globalHeaders,
-      headers,
-      params,
-      body,
-      arrayFormat,
-      abortController
-    } = config;
+    let { baseUri, path, mode, method, globalHeaders, headers, params, body, arrayFormat, abortController } = config;
 
-    const fullUri = `${baseUri}${path}${
-      params ? "?" + qs.stringify(params, { arrayFormat }) : ""
-    }`;
+    const fullUri = `${baseUri}${path}${params ? "?" + qs.stringify(params, { arrayFormat }) : ""}`;
 
     if (method) {
       method = method === "del" ? "DELETE" : method.toUpperCase();
@@ -154,9 +162,7 @@ export default function createRequest(config) {
     }
 
     if (method !== "GET" && method !== "HEAD") {
-      const isBinary = [Blob, FormData].reduce(
-        (acc, type) => body instanceof type
-      );
+      const isBinary = [Blob, FormData].reduce((acc, type) => body instanceof type);
 
       if (isBinary) {
         body = body;
