@@ -3,17 +3,22 @@ import AbortablePromise from "./abortablePromise";
 import createResponse from "./fResponse.js";
 import createRequest from "./fRequest.js";
 
-const methods = [
-  "get",
-  "head",
-  "post",
-  "put",
-  "del",
-  "delete",
-  "options",
-  "patch"
-];
+const methods = ["get", "head", "post", "put", "del", "delete", "options", "patch"];
 
+/**
+ * { function_description }
+ *
+ * @class      Fennch (name)
+ * @param      {<type>}                              opts       The options
+ * @param {string} opts.baseUrl
+ * @param {string} opts.mode
+ * @param {string} opts.arrayFormat
+ * @param {Object} opts.auth
+ * @param {number} opts.timeout
+ * @param {Object} fetchImpl
+ * @param      {<type>}                              fetchImpl  The fetch implementation
+ * @return     {(AbortablePromise|Function|string)}  { description_of_the_return_value }
+ */
 export default function Fennch(
   opts = {
     parseErr: null,
@@ -33,16 +38,6 @@ export default function Fennch(
   const fetch = fetchImpl || global.fetch;
 
   fennch.interceptor = Interceptor();
-
-  // TODO: Remove?
-  Object.defineProperty(fennch, "parseErr", {
-    enumerable: false,
-    value:
-      opts.parseErr ||
-      new Error(
-        `Invalid JSON received${opts.baseURI ? ` from ${opts.baseURI}` : ""}`
-      )
-  });
 
   const prepareRequest = (path = "/", options = {}) => {
     if (options && (typeof options !== "object" || Array.isArray(options))) {
@@ -81,10 +76,7 @@ export default function Fennch(
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
         const rawResponse = await fetch(fRequest.raw);
         let fResponse = await createResponse(rawResponse, fRequest);
-        fResponse = await fennch.interceptor.interceptResponse(
-          fRequest.abortController,
-          fResponse
-        );
+        fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
 
         resolve(fResponse);
       } catch (err) {
@@ -104,10 +96,7 @@ export default function Fennch(
         }, timeout);
       });
 
-      return AbortablePromise.race(fRequest.abortController, [
-        promise,
-        timer
-      ]).then(
+      return AbortablePromise.race(fRequest.abortController, [promise, timer]).then(
         value => {
           return value;
         },
@@ -140,6 +129,7 @@ export default function Fennch(
 
   return fennch;
 }
+
 
 export const APromise = AbortablePromise;
 export const createFResponse = createResponse;

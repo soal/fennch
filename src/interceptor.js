@@ -1,5 +1,11 @@
 import AbortablePromise from "./abortablePromise";
 
+/**
+ * { function_description }
+ *
+ * @class      Interceptor (name)
+ * @return     {<type>}  { description_of_the_return_value }
+ */
 export default function Interceptor() {
   const interceptor = {
     register(interceptor) {
@@ -22,9 +28,7 @@ export default function Interceptor() {
       let promise = AbortablePromise.resolve(fRequest.abortController, fRequest);
       this.interceptors.forEach(({ request, requestError } = {}) => {
         if (typeof request === "function") {
-          promise = promise.then(req =>
-            request(req)
-          );
+          promise = promise.then(req => request(req));
         }
         if (typeof requestError === "function") {
           promise = promise.catch(requestError);
@@ -46,11 +50,11 @@ export default function Interceptor() {
           promise = promise.catch(responseError);
         }
       });
-      return promise
-    },
-  }
+      return promise;
+    }
+  };
 
-  interceptor.interceptors = []
+  interceptor.interceptors = [];
 
-  return interceptor
+  return interceptor;
 }

@@ -1,3 +1,9 @@
+/**
+ * Gets the type.
+ *
+ * @param      {Array}   contentType  The content type
+ * @return     {string}  The type.
+ */
 function getType(contentType) {
   if (contentType.includes("json")) {
     return "json";
@@ -7,6 +13,12 @@ function getType(contentType) {
   return "blob";
 }
 
+/**
+ * { function_description }
+ *
+ * @param      {<type>}   rawResponse  The raw response
+ * @return     {Promise}  { description_of_the_return_value }
+ */
 async function parseResponse(rawResponse) {
   let body = null;
   let error = null;
@@ -48,6 +60,13 @@ async function parseResponse(rawResponse) {
   return { body, error };
 }
 
+/**
+ * Creates a response.
+ *
+ * @param      {<type>}   rawResponse  The raw response
+ * @param      {<type>}   fRequest     The f request
+ * @return     {Promise}  { description_of_the_return_value }
+ */
 export default async function createResponse(rawResponse, fRequest) {
   let { body, error } = await parseResponse(rawResponse);
 

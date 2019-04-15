@@ -22,7 +22,7 @@
     "babel-loader": "^8.0.5",
     "cache-loader": "^2.0.1",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
-    "eslint": "^5.12.1",
+    "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.0.0",
     "husky": "^1.0.1",
     "lint-staged": "^8.0.0",

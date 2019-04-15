@@ -1,27 +1,24 @@
+/**
+ * Class for abortable promise.
+ *
+ * @class      AbortablePromise (name)
+ */
 class AbortablePromise {
   constructor(executor, aborter = new AbortController()) {
     this.abortController = aborter;
     if (executor instanceof Promise) {
       this.promise = executor;
     } else {
-      this.promise = new Promise((resolve, reject) =>
-        executor(resolve, reject, this.abortController.signal)
-      );
+      this.promise = new Promise((resolve, reject) => executor(resolve, reject, this.abortController.signal));
     }
   }
 
   then(...args) {
-    return new AbortablePromise(
-      this.promise.then(...args),
-      this.abortController
-    );
+    return new AbortablePromise(this.promise.then(...args), this.abortController);
   }
 
   catch(...args) {
-    return new AbortablePromise(
-      this.promise.catch(...args),
-      this.abortController
-    );
+    return new AbortablePromise(this.promise.catch(...args), this.abortController);
   }
 
   finally(...args) {
