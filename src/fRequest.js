@@ -142,13 +142,11 @@ export default function createRequest(config) {
   let fRequest = null;
   if (config instanceof Request) {
     const abortController = config.abortController || new AbortController();
-    const rawRequest = new Request(config.url, {
-      headers: config.headers,
-      method: config.method,
-      body: config.body,
-      mode: config.mode,
+
+    const rawRequest = new Request(config.raw || config, {
       signal: abortController.signal
     });
+
     fRequest = makeProxy(rawRequest, config.body, abortController);
   } else {
     let { baseUri, path, mode, method, globalHeaders, headers, params, body, arrayFormat, abortController } = config;
