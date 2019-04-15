@@ -120,16 +120,15 @@ function makeProxy(rawRequest, body, abortController) {
 export default function createRequest(config) {
   let fRequest = null;
   if (config instanceof Request) {
+    const abortController = config.abortController || new AbortController();
     const rawRequest = new Request(config.url, {
       headers: config.headers,
       method: config.method,
       body: config.body,
       mode: config.mode,
-      signal: config.abortController.signal
+      signal: abortController.signal
     });
-    fRequest = makeProxy(rawRequest, config.body, config.abortController);
-
-    // fRequest.headers = config.headers;
+    fRequest = makeProxy(rawRequest, config.body, abortController);
   } else {
     let {
       baseUri,
