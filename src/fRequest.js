@@ -143,7 +143,8 @@ export default function createRequest(config) {
   if (config instanceof Request) {
     const abortController = config.abortController || new AbortController();
 
-    const rawRequest = new Request(config.raw || config, {
+    const clonedRawRequest = config.raw ? config.raw.clone() : config.clone()
+    const rawRequest = new Request(clonedRawRequest, {
       signal: abortController.signal
     });
 
