@@ -7,6 +7,8 @@ Modern fetch-based HTTP client for the browser.
 | <a href="#quickstart">fetch</a> + <a href="#request-abortion">request abortion</a> + <a href="timeout">timeout support</a> + <a href="#interceptors">request and response interceptions</a>
 |</p>
 
+_[Story](https://soal.red/fennch) about this library_
+
 ## Quickstart
 
 ### Basic usage
