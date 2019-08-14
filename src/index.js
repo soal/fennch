@@ -55,7 +55,7 @@ export default function Fennch(
     const abortController = new AbortController();
 
     const fRequest = createRequest({
-      baseUri: fennch.opts.baseUri,
+      baseUri: options.baseUri,
       path,
       mode: options.mode,
       method: options.method,
