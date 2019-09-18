@@ -69,6 +69,10 @@ async function parseResponse(rawResponse) {
  */
 export default async function createResponse(rawResponse, fRequest) {
   let { body, error } = await parseResponse(rawResponse);
+  let cancel = false
+  if (error && error instanceof DOMException && rawResponse.name === 'AbortError') {
+    cancel = true
+  }
 
   return new Proxy(rawResponse, {
     get(target, key) {
@@ -78,6 +82,9 @@ export default async function createResponse(rawResponse, fRequest) {
 
         case "body":
           return body;
+
+        case "cancel":
+          return cancel;
 
         case "error":
           return error;
