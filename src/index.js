@@ -1,3 +1,22 @@
+/**
+ * @module     {Function} Fennch
+ * Fennch implments convenient API for making requests,
+ * getting data from server responses and abort requests above native browser Fetch API.
+ *
+ * It's API based heavily on Axios API design.
+ * This module exports fabric function that allows to create instance of Fennch
+ * with parameters used as defaults for requests made by this instance.
+ *
+ * There is several base modules:
+ * - FRequest
+ * - FResponse
+ * - AbortablePromise
+ * - Interceptor
+ *
+ * Fennch use native Proxy for implementing convinient access to request and response data.
+ */
+
+
 import Interceptor from "./interceptor.js";
 import AbortablePromise from "./abortablePromise";
 import createResponse from "./fResponse.js";
