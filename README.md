@@ -10,7 +10,6 @@ Modern fetch-based HTTP client for the browser.
 </p>
 
 - [Quickstart](#quickstart)
-- [API reference](#api)
 - [Story →](https://soal.red/fennch)
 
 ## Quickstart
@@ -145,7 +144,7 @@ const unregister = fennch.interceptor.register({
 unregister() // unregister interceptor
 ```
 
-Example:
+Simple example:
 ```js
 const api = Fennch({
   baseUri: "http://awesome.app/api"
@@ -183,4 +182,37 @@ const unregister = api.interceptor.register({
 
 ```
 
-## API
+Example for refreshing authorization token using interceptor:
+```js
+const accessToken = "some_access_token"
+const refreshToken = "some_refresh_token"
+const api = Fennch({
+  baseUri: "http://awesome.app/api",
+  headers: {
+    "Content-Type": "application/json",
+    Accept: 'application/json',
+    Authorization: `Bearer ${accessToken}`
+  },
+});
+
+api.interceptors.register({
+  async response(response) {
+    if (response.status === 401) {
+      try {
+        const refreshed = await api.post('/refresh_token', {
+          headers: {
+            Authorization: `Bearer ${refreshToken}`
+          }
+        })
+        const newAccessToken = refreshed.body.token
+        const request = response.request
+        request.headers.Authorization = `Bearer ${newAccessToken}`
+        return api.req(request)
+      } catch (error) {
+        return Promise.reject(error)
+      }
+    }
+  }
+})
+```
+
