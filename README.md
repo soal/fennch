@@ -1,13 +1,17 @@
 # Fennch
 
-Modern fetch-based HTTP client for the browser.
+Modern fetch-based HTTP client for the browser.  
+
+[![npm version](https://img.shields.io/npm/v/fennch.svg?style=flat-square)](https://www.npmjs.org/package/fennch)
 
 <h3 align="center">Fennch is:</h3>
 <p align="center">
-<a href="#quickstart">fetch</a> + <a href="#request-abortion">request abortion</a> + <a href="timeout">timeout support</a> + <a href="#interceptors">request and response interceptions</a>
+<a href="#basic-usage">fetch</a> + <a href="#request-abortion">request abortion</a> + <a href="#timeout">timeout support</a> + <a href="#interceptors">request and response interceptions</a>
 </p>
 
-_[Story](https://soal.red/fennch) about this library_
+- [Quickstart](#quickstart)
+- [API reference](#api)
+- [Story →](https://soal.red/fennch)
 
 ## Quickstart
 
@@ -87,6 +91,44 @@ MySuperComponent.handleUserAbort();
 
 ### Timeout
 
+```js
+// Global timeout
+const api = Fennch({
+  baseUri: "http://awesome.app/api",
+  timeout: 10000
+});
+
+async function apiCall() {
+  try {
+    await api.get("/awesome-data", {
+        params: {
+            awesome: "really",
+            params: "cool"
+        }
+    });
+  } catch (err) {
+    // If request pednding more than 10 sec
+    console.log(err.toString()) // -> 'AbortError'
+  }
+}
+
+// Timeout per-request, overrides global value
+async function apiCallWithTimeout() {
+  try {
+    await api.get("/awesome-data", {
+        timeout: 20000,
+        params: {
+            awesome: "really",
+            params: "cool"
+        }
+    });
+  } catch (err) {
+    // If request pednding more than 20 sec
+    console.log(err.toString()) // -> 'AbortError'
+  }
+}
+```
+
 ### Interceptors
 
 You can register any number of interceptors using `register()` method.
@@ -100,7 +142,7 @@ const unregister = fennch.interceptor.register({
   responseError(error) {}
 })
 
-unregister()
+unregister() // unregister interceptor
 ```
 
 Example:
@@ -140,3 +182,5 @@ const unregister = api.interceptor.register({
 })
 
 ```
+
+## API
