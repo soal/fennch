@@ -107,7 +107,7 @@ async function apiCall() {
     });
   } catch (err) {
     // If request pednding more than 10 sec
-    console.log(err.toString()) // -> 'AbortError'
+    console.log(err.toString()) // -> "Timeout exceeded"
   }
 }
 
@@ -123,7 +123,7 @@ async function apiCallWithTimeout() {
     });
   } catch (err) {
     // If request pednding more than 20 sec
-    console.log(err.toString()) // -> 'AbortError'
+    console.log(err.toString()) // -> "Timeout exceeded"
   }
 }
 ```
