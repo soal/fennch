@@ -4,8 +4,8 @@ Modern fetch-based HTTP client for the browser.
 
 <h3 align="center">Fennch is:</h3>
 <p align="center">
-| <a href="#quickstart">fetch</a> + <a href="#request-abortion">request abortion</a> + <a href="timeout">timeout support</a> + <a href="#interceptors">request and response interceptions</a>
-|</p>
+<a href="#quickstart">fetch</a> + <a href="#request-abortion">request abortion</a> + <a href="timeout">timeout support</a> + <a href="#interceptors">request and response interceptions</a>
+</p>
 
 _[Story](https://soal.red/fennch) about this library_
 

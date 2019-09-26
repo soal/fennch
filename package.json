@@ -16,22 +16,22 @@
     "watch": "webpack --watch"
   },
   "devDependencies": {
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.3.1",
-    "babel-eslint": "^10.0.1",
-    "babel-loader": "^8.0.5",
-    "cache-loader": "^2.0.1",
+    "@babel/core": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "cache-loader": "^4.1.0",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
-    "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.0.0",
-    "husky": "^1.0.1",
-    "lint-staged": "^8.0.0",
-    "prettier": "^1.14.3",
-    "terser-webpack-plugin": "^1.2.1",
-    "webpack": "^4.29.0",
-    "webpack-cli": "^3.2.1"
+    "eslint": "^6.4.0",
+    "eslint-config-prettier": "^6.3.0",
+    "husky": "^3.0.5",
+    "lint-staged": "^9.4.0",
+    "prettier": "^1.18.2",
+    "terser-webpack-plugin": "^2.1.0",
+    "webpack": "^4.41.0",
+    "webpack-cli": "^3.3.9"
   },
   "dependencies": {
-    "qs": "^6.6.0"
+    "qs": "^6.9.0"
   }
 }
