@@ -89,7 +89,6 @@ MySuperComponent.handleUserAbort();
 
 ### Interceptions
 
-
 You can register any number of interceptors using `register()` method.
 It returns function that can be used to unregister this interceptor.
 
@@ -102,6 +101,7 @@ const unregister = fennch.interceptor.register({
 })
 
 unregister()
+```
 
 Example:
 ```
