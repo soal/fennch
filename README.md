@@ -87,7 +87,7 @@ MySuperComponent.handleUserAbort();
 
 ### Timeout
 
-### Interceptions
+### Interceptors
 
 You can register any number of interceptors using `register()` method.
 It returns function that can be used to unregister this interceptor.
