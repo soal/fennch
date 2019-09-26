@@ -92,7 +92,7 @@ MySuperComponent.handleUserAbort();
 You can register any number of interceptors using `register()` method.
 It returns function that can be used to unregister this interceptor.
 
-```
+```js
 const unregister = fennch.interceptor.register({
   request(request) {}, // Must return FRequest object, for example `request` that passed as an argument
   requestError(error) {},
@@ -104,7 +104,7 @@ unregister()
 ```
 
 Example:
-```
+```js
 const api = Fennch({
   baseUri: "http://awesome.app/api"
 });
