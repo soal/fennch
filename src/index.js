@@ -56,6 +56,10 @@ const methods = ["get", "head", "post", "put", "del", "delete", "options", "patc
  * @param      {<type>}                              fetchImpl  The fetch implementation
  * @return     {(AbortablePromise|Function|string)}  { description_of_the_return_value }
  */
+
+require("abort-controller/polyfill")
+// console.log("Abort Controller Polyfill", AbortController)
+
 export default function Fennch(
   opts = {
     parseErr: null,
@@ -77,6 +81,7 @@ export default function Fennch(
   fennch.interceptor = Interceptor();
 
   const prepareRequest = (path = "/", options = {}) => {
+    console.log('PREPARE!')
     if (options && (typeof options !== "object" || Array.isArray(options))) {
       throw new TypeError("`options` must be an object");
     }
@@ -91,6 +96,7 @@ export default function Fennch(
 
     const abortController = new AbortController();
 
+    console.log('PRE_CREATE')
     const fRequest = createRequest({
       baseUri: options.baseUri,
       path,
@@ -108,15 +114,28 @@ export default function Fennch(
   };
 
   const makeRequest = fRequest => {
+    console.log('MAKE REUQEST')
     const promise = new AbortablePromise(async (resolve, reject) => {
       try {
+        console.log('BEFORE REQUEST INTERCEPTOR')
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
-        const rawResponse = await fetch(fRequest.raw);
+        let rawResponse = null
+        console.log('RIGHT BEFORE FETCH', fRequest)
+        if (fRequest.native) {
+          rawResponse = await fetch(fRequest.raw);
+        } else {
+          console.log("NOT NATIVE")
+          console.log(fRequest.baseUri + fRequest.path)
+          // rawResponse = await fetch(fRequest.baseUri + fRequest.path, fRequest);
+          rawResponse = await fetch(fRequest.baseUri + fRequest.path);
+        }
+        console.log('RIGHT AFTER FETCH')
         let fResponse = await createResponse(rawResponse, fRequest);
         fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
 
         resolve(fResponse);
       } catch (err) {
+        console.log('INDEX ERROR: ', err)
         const fResponse = await createResponse(err, fRequest);
         reject(fResponse);
       }
@@ -158,7 +177,10 @@ export default function Fennch(
     };
   };
 
-  fennch.req = request => makeRequest(createRequest(request));
+  fennch.req = request => {
+    console.log("REQ METHOD")
+    return makeRequest(createRequest(request))
+  };
 
   methods.forEach(method => {
     fennch[method] = setup(method);

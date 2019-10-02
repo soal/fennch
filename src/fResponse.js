@@ -23,7 +23,8 @@ async function parseResponse(rawResponse) {
   let body = null;
   let error = null;
 
-  if (rawResponse instanceof Response) {
+  const Response = Response || null
+  if (Response && rawResponse instanceof Response) {
     if (rawResponse.status === 204 && rawResponse.ok) {
       return { body, error };
     }
@@ -53,8 +54,10 @@ async function parseResponse(rawResponse) {
         }
         break;
     }
-  } else {
+  } else if (rawResponse instanceof Error) {
     error = rawResponse;
+  } else {
+    return rawResponse
   }
 
   return { body, error };
@@ -70,7 +73,7 @@ async function parseResponse(rawResponse) {
 export default async function createResponse(rawResponse, fRequest) {
   let { body, error } = await parseResponse(rawResponse);
   let cancel = false
-  if (error && error instanceof DOMException && rawResponse.name === 'AbortError') {
+  if (DOMException && error && error instanceof DOMException && rawResponse.name === 'AbortError') {
     cancel = true
   }
 

@@ -140,49 +140,59 @@ function makeProxy(rawRequest, body, abortController) {
  */
 export default function createRequest(config) {
   let fRequest = null;
-  if (config instanceof Request) {
-    const abortController = config.abortController || new AbortController();
+  // console.log('REQUEST CREATION', config)
+  const Request = Request || null
+  console.log('REQUEST OBJECT IS', Request)
+  if (Request) {
+    if (config instanceof Request) {
+      const abortController = config.abortController || new AbortController();
 
-    const clonedRawRequest = config.raw ? config.raw.clone() : config.clone()
-    const rawRequest = new Request(clonedRawRequest, {
-      signal: abortController.signal
-    });
+      const clonedRawRequest = config.raw ? config.raw.clone() : config.clone()
+      const rawRequest = new Request(clonedRawRequest, {
+        signal: abortController.signal
+      });
 
-    fRequest = makeProxy(rawRequest, config.body, abortController);
-  } else {
-    let { baseUri, path, mode, method, globalHeaders, headers, params, body, arrayFormat, abortController } = config;
-
-    const fullUri = `${baseUri}${path}${params ? "?" + qs.stringify(params, { arrayFormat }) : ""}`;
-
-    if (method) {
-      method = method === "del" ? "DELETE" : method.toUpperCase();
+      fRequest = makeProxy(rawRequest, config.body, abortController);
     } else {
-      method = "GET";
-    }
+      let { baseUri, path, mode, method, globalHeaders, headers, params, body, arrayFormat, abortController } = config;
 
-    if (method !== "GET" && method !== "HEAD") {
-      const isBinary = [Blob, FormData].reduce((acc, type) => body instanceof type);
+      const fullUri = `${baseUri}${path}${params ? "?" + qs.stringify(params, { arrayFormat }) : ""}`;
 
-      if (isBinary) {
-        body = body;
+      if (method) {
+        method = method === "del" ? "DELETE" : method.toUpperCase();
       } else {
-        body = JSON.stringify(body);
+        method = "GET";
       }
+
+      if (method !== "GET" && method !== "HEAD") {
+        const isBinary = [Blob, FormData].reduce((acc, type) => body instanceof type);
+
+        if (isBinary) {
+          body = body;
+        } else {
+          body = JSON.stringify(body);
+        }
+      }
+
+      const rawRequest = new Request(fullUri, {
+        method,
+        body,
+        mode,
+        signal: abortController.signal
+      });
+
+      fRequest = makeProxy(rawRequest, body, abortController);
+
+      let allHeaders = Object.assign({}, globalHeaders, headers);
+
+      fRequest.headers = allHeaders;
+      fRequest.native = true
     }
 
-    const rawRequest = new Request(fullUri, {
-      method,
-      body,
-      mode,
-      signal: abortController.signal
-    });
-
-    fRequest = makeProxy(rawRequest, body, abortController);
-
-    let allHeaders = Object.assign({}, globalHeaders, headers);
-
-    fRequest.headers = allHeaders;
+  } else {
+    console.log('NOT IN BROWSER RETURN')
+    fRequest = config
+    fRequest.native = false
   }
-
   return fRequest;
 }
