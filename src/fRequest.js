@@ -132,9 +132,10 @@ function makeProxy(rawRequest, body, abortController) {
   });
 }
 
-export default function makeCreateRequest(Request, AbortController) {
+export default function makeCreateRequest(Request, AbortController, AbortSignal) {
   return config => {
     let fRequest = null;
+    console.log("FREQUEST: ABORT CONTROLLER", AbortController)
     if (config instanceof Request) {
       const abortController = config.abortController || new AbortController();
 
@@ -164,13 +165,24 @@ export default function makeCreateRequest(Request, AbortController) {
           body = JSON.stringify(body);
         }
       }
-
+      console.log("FREQUEST: BEFORE CREATING NON-NATIVE")
+      console.log("FREQUEST: CONFIG NOT NATIVE ABORT SIGNAL")
+      const abortSignalProto = (
+        abortController.signal
+        && typeof abortController.signal === "object"
+        && Object.getPrototypeOf(abortController.signal)
+      );
+      console.log("ABORT SIGNAL NAME ", abortSignalProto.constructor.name)
+      // if (abortSignalProto.constructor.name !== "AbortSignal") {
+      //   abortSignalProto.constructor.name = "AbortSignal"
+      // }
       const rawRequest = new Request(fullUri, {
         method,
         body,
         mode,
         signal: abortController.signal
       });
+      console.log("FREQUEST: RAW REQUEST CREATED")
 
       fRequest = makeProxy(rawRequest, body, abortController);
 
@@ -181,59 +193,4 @@ export default function makeCreateRequest(Request, AbortController) {
 
     return fRequest;
   };
-}
-
-/**
- * Creates a request.
- *
- * @param      {<type>}    config  The configuration
- * @return     {Function}  { description_of_the_return_value }
- */
-function createRequest(config, Request, AbortController) {
-  let fRequest = null;
-  if (config instanceof Request) {
-    const abortController = config.abortController || new AbortController();
-
-    const clonedRawRequest = config.raw ? config.raw.clone() : config.clone();
-    const rawRequest = new Request(clonedRawRequest, {
-      signal: abortController.signal
-    });
-
-    fRequest = makeProxy(rawRequest, config.body, abortController);
-  } else {
-    let { baseUri, path, mode, method, globalHeaders, headers, params, body, arrayFormat, abortController } = config;
-
-    const fullUri = `${baseUri}${path}${params ? "?" + qs.stringify(params, { arrayFormat }) : ""}`;
-
-    if (method) {
-      method = method === "del" ? "DELETE" : method.toUpperCase();
-    } else {
-      method = "GET";
-    }
-
-    if (method !== "GET" && method !== "HEAD") {
-      const isBinary = [Blob, FormData].reduce((acc, type) => body instanceof type);
-
-      if (isBinary) {
-        body = body;
-      } else {
-        body = JSON.stringify(body);
-      }
-    }
-
-    const rawRequest = new Request(fullUri, {
-      method,
-      body,
-      mode,
-      signal: abortController.signal
-    });
-
-    fRequest = makeProxy(rawRequest, body, abortController);
-
-    let allHeaders = Object.assign({}, globalHeaders, headers);
-
-    fRequest.headers = allHeaders;
-  }
-
-  return fRequest;
 }

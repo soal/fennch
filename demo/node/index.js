@@ -1,5 +1,5 @@
-const Fennch = require("../../dist/fennch").fennch;
 const fetch = require("node-fetch");
+const Fennch = require("../../dist/fennch").fennch;
 require("babel-polyfill");
 console.log(Fennch)
 
@@ -14,14 +14,10 @@ const api = Fennch({
 
 async function makeFastRequest() {
   let result = ""
-  // try {
   result = await api.get("/fast");
   console.log("RESULT: ", result);
   console.log("RESULT MESSAGE: ", result.body.msg);
-  // } catch (err) {
-  //   console.log("ERROR!", err)
-  //   result = err
-  // }
+
 }
 
 makeFastRequest();

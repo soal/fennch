@@ -79,7 +79,7 @@ export default function Fennch(
   const Response = fetchImpl.Response || global.Response;
   const Headers = fetchImpl.Headers || global.Headers;
 
-  const createRequest = makeCreateRequest(Request, AbortController)
+  const createRequest = makeCreateRequest(Request, AbortController, AbortSignal)
   const createResponse = makeCreateResponse(Response)
 
   fennch.interceptor = Interceptor();
@@ -99,6 +99,7 @@ export default function Fennch(
 
     const abortController = new AbortController();
 
+    console.log("PREPARE")
     const fRequest = createRequest({
       baseUri: options.baseUri,
       path,
@@ -111,6 +112,7 @@ export default function Fennch(
       arrayFormat: fennch.opts.arrayFormat,
       abortController
     });
+    console.log("PREPARE: FREQUEST CREATED", fRequest)
 
     return fRequest;
   };
@@ -177,5 +179,5 @@ export default function Fennch(
 
 
 export const APromise = AbortablePromise;
-export const createFResponse = createResponse;
-export const createFRequect = createRequest;
+export const makeCreateFResponse = makeCreateResponse;
+export const makeCreateFRequest = makeCreateRequest;
