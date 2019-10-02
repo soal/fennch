@@ -13,6 +13,37 @@ function getType(contentType) {
   return "blob";
 }
 
+async function getBody(rawResponse, type) {
+  console.log("TYPE IN GET BODY", type)
+  let body, error
+  switch (type) {
+    case "json":
+      try {
+        body = await rawResponse.json();
+      } catch (err) {
+        error = err;
+      }
+      break;
+
+    case "text":
+      try {
+        body = await rawResponse.text();
+      } catch (err) {
+        error = err;
+      }
+      break;
+
+    default:
+      try {
+        body = await rawResponse.blob();
+      } catch (err) {
+        error = err;
+      }
+      break;
+  }
+  return { body, error }
+}
+
 /**
  * { function_description }
  *
@@ -23,7 +54,7 @@ async function parseResponse(rawResponse) {
   let body = null;
   let error = null;
 
-  const Response = Response || null
+  const Response = Response || null;
   if (Response && rawResponse instanceof Response) {
     if (rawResponse.status === 204 && rawResponse.ok) {
       return { body, error };
@@ -57,7 +88,9 @@ async function parseResponse(rawResponse) {
   } else if (rawResponse instanceof Error) {
     error = rawResponse;
   } else {
-    return rawResponse
+    const parsed = await getBody(rawResponse, getType(rawResponse.headers.get("Content-Type")))
+    console.log('DATA IN RESP NON_NATIVE:', parsed)
+    return { body: parsed.body, error: parsed.error };
   }
 
   return { body, error };
@@ -72,9 +105,12 @@ async function parseResponse(rawResponse) {
  */
 export default async function createResponse(rawResponse, fRequest) {
   let { body, error } = await parseResponse(rawResponse);
-  let cancel = false
-  if (DOMException && error && error instanceof DOMException && rawResponse.name === 'AbortError') {
-    cancel = true
+  console.log("RESPONSE DATA", body, error)
+  let cancel = false;
+  const DOMException = DOMException || null;
+  // console.log('FRESPONSE: ', rawResponse, fRequest)
+  if (DOMException && error && error instanceof DOMException && rawResponse.name === "AbortError") {
+    cancel = true;
   }
 
   return new Proxy(rawResponse, {

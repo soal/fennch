@@ -132,7 +132,7 @@ export default function Fennch(
         console.log('RIGHT AFTER FETCH')
         let fResponse = await createResponse(rawResponse, fRequest);
         fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
-
+        console.log('AFTER RESPONSE INTERCEPTOR', fResponse)
         resolve(fResponse);
       } catch (err) {
         console.log('INDEX ERROR: ', err)
