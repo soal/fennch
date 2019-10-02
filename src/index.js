@@ -37,8 +37,10 @@
 
 import Interceptor from "./interceptor";
 import AbortablePromise from "./abortablePromise";
-import createResponse from "./fResponse";
-import createRequest from "./fRequest";
+import makeCreateResponse from "./fResponse";
+import makeCreateRequest from "./fRequest";
+
+require("abort-controller/polyfill")
 
 const methods = ["get", "head", "post", "put", "del", "delete", "options", "patch"];
 
@@ -73,6 +75,12 @@ export default function Fennch(
   };
 
   const fetch = fetchImpl || global.fetch;
+  const Request = fetchImpl.Request || global.Request;
+  const Response = fetchImpl.Response || global.Response;
+  const Headers = fetchImpl.Headers || global.Headers;
+
+  const createRequest = makeCreateRequest(Request, AbortController)
+  const createResponse = makeCreateResponse(Response)
 
   fennch.interceptor = Interceptor();
 
