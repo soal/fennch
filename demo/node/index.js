@@ -1,7 +1,6 @@
 const fetch = require("node-fetch");
 const Fennch = require("../../dist/fennch").fennch;
 require("babel-polyfill");
-console.log(Fennch);
 
 const api = Fennch({
   baseUri: "http://localhost:3333", // optional
@@ -9,7 +8,7 @@ const api = Fennch({
     "Accept": "application/json",
     "Content-Type": "application/json"
   },
-  timeout: 20000
+  timeout: 5000
 }, fetch);
 
 async function makeFastRequest() {
@@ -21,9 +20,18 @@ async function makeFastRequest() {
 
 async function makeSlowRequest() {
   let result = "";
-  result = await api.get("/slow");
-  console.log("RESULT: ", result);
-  console.log("RESULT MESSAGE: ", result.body.msg);
+  try {
+    const req = api.get("/slow");
+    // result = await api.get("/slow");
+    setTimeout(() => {
+      req.abort();
+    }, 2000)
+    result = await req;
+    console.log("RESULT: ", result);
+    console.log("RESULT MESSAGE: ", result.body.msg);
+  } catch(err) {
+    console.log('SLOW REQUEST ERROR: ', err)
+  }
 }
 
 makeFastRequest();

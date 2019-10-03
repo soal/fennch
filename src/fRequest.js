@@ -134,7 +134,7 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
   return config => {
     let fRequest = null;
     if (config instanceof Request) {
-    console.log("FREQUEST: CONFIG AS REQUEST ", config)
+    // console.log("FREQUEST: CONFIG AS REQUEST ", config)
       const abortController = config.abortController || new AbortController();
 
       const abortSignalProto = (

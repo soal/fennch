@@ -64,7 +64,7 @@ export default function makeCreateResponse(Response) {
   return async (rawResponse, fRequest) => {
     let { body, error } = await parseResponse(rawResponse, Response);
     let cancel = false;
-    if (error && error instanceof DOMException && rawResponse.name === "AbortError") {
+    if (rawResponse.name === "AbortError") {
       cancel = true;
     }
 

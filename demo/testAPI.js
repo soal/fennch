@@ -16,7 +16,7 @@ app.use(async ctx => {
       break
 
     case "/slow":
-      ctx.body = await slowRes(5000);
+      ctx.body = await slowRes(20000);
       break
 
     case "/post":
