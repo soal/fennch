@@ -122,7 +122,6 @@ function makeProxy(rawRequest, body, abortController) {
           }
           return true;
 
-
         default:
           target[prop] = value;
       }
@@ -134,14 +133,13 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
   return config => {
     let fRequest = null;
     if (config instanceof Request) {
-    // console.log("FREQUEST: CONFIG AS REQUEST ", config)
+      // console.log("FREQUEST: CONFIG AS REQUEST ", config)
       const abortController = config.abortController || new AbortController();
 
-      const abortSignalProto = (
-        abortController.signal
-        && typeof abortController.signal === "object"
-        && Object.getPrototypeOf(abortController.signal)
-      );
+      const abortSignalProto =
+        abortController.signal &&
+        typeof abortController.signal === "object" &&
+        Object.getPrototypeOf(abortController.signal);
 
       if (abortSignalProto.constructor.name !== "AbortSignal") {
         // HACK: Inside node-fetch AbortSingnal type cheked by `name` of `abortSignalProto.constructor`.
@@ -149,7 +147,7 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
         Object.defineProperty(abortSignalProto.constructor, "name", {
           value: "AbortSignal",
           configurable: true
-        })
+        });
       }
 
       const clonedRawRequest = config.raw ? config.raw.clone() : config.clone();
@@ -179,11 +177,10 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
       }
       // console.log("FREQUEST: BEFORE CREATING NON-NATIVE")
       // console.log("FREQUEST: CONFIG NOT NATIVE ABORT SIGNAL")
-      const abortSignalProto = (
-        abortController.signal
-        && typeof abortController.signal === "object"
-        && Object.getPrototypeOf(abortController.signal)
-      );
+      const abortSignalProto =
+        abortController.signal &&
+        typeof abortController.signal === "object" &&
+        Object.getPrototypeOf(abortController.signal);
       // console.log("ABORT SIGNAL NAME ", abortSignalProto.constructor.name)
       // console.log("ABORT SIGNAL IS INSTANCE OF", abortController.signal instanceof AbortSignal)
       if (abortSignalProto.constructor.name !== "AbortSignal") {
@@ -192,7 +189,7 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
         Object.defineProperty(abortSignalProto.constructor, "name", {
           value: "AbortSignal",
           configurable: true
-        })
+        });
       }
       const rawRequest = new Request(fullUri, {
         method,
