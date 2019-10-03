@@ -37,8 +37,10 @@
 
 import Interceptor from "./interceptor";
 import AbortablePromise from "./abortablePromise";
-import createResponse from "./fResponse";
-import createRequest from "./fRequest";
+import makeCreateResponse from "./fResponse";
+import makeCreateRequest from "./fRequest";
+
+require("abort-controller/polyfill");
 
 const methods = ["get", "head", "post", "put", "del", "delete", "options", "patch"];
 
@@ -73,6 +75,12 @@ export default function Fennch(
   };
 
   const fetch = fetchImpl || global.fetch;
+  const Request = fetchImpl.Request || global.Request;
+  const Response = fetchImpl.Response || global.Response;
+  const Headers = fetchImpl.Headers || global.Headers;
+
+  const createRequest = makeCreateRequest(Request, AbortController, AbortSignal);
+  const createResponse = makeCreateResponse(Response);
 
   fennch.interceptor = Interceptor();
 
@@ -91,6 +99,7 @@ export default function Fennch(
 
     const abortController = new AbortController();
 
+    // console.log("PREPARE")
     const fRequest = createRequest({
       baseUri: options.baseUri,
       path,
@@ -103,6 +112,7 @@ export default function Fennch(
       arrayFormat: fennch.opts.arrayFormat,
       abortController
     });
+    // console.log("PREPARE: FREQUEST CREATED", fRequest)
 
     return fRequest;
   };
@@ -111,12 +121,25 @@ export default function Fennch(
     const promise = new AbortablePromise(async (resolve, reject) => {
       try {
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
-        const rawResponse = await fetch(fRequest.raw);
+        let rawResponse = null;
+        if (fetchImpl !== global.fetch) {
+          // console.log('===========================')
+          // console.log('FETCH URL DATA', fRequest.parsedURL)
+          // console.log('FETCH REQ SYMBOLS', Object.getOwnPropertySymbols(fRequest))
+          const symbols = Object.getOwnPropertySymbols(fRequest);
+          const fullUri = fRequest[symbols[1]].parsedURL.href;
+          // console.log('FULL URI', fullUri)
+          // console.log('===========================')
+          rawResponse = await fetch(fullUri, fRequest.raw);
+        } else {
+          rawResponse = await fetch(fRequest.raw);
+        }
         let fResponse = await createResponse(rawResponse, fRequest);
         fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
 
         resolve(fResponse);
       } catch (err) {
+        // console.log('ERROR: ', err)
         const fResponse = await createResponse(err, fRequest);
         reject(fResponse);
       }
@@ -167,7 +190,6 @@ export default function Fennch(
   return fennch;
 }
 
-
 export const APromise = AbortablePromise;
-export const createFResponse = createResponse;
-export const createFRequect = createRequest;
+export const makeCreateFResponse = makeCreateResponse;
+export const makeCreateFRequest = makeCreateRequest;

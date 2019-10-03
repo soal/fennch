@@ -6,7 +6,6 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = {
   mode: "production",
-  // context: path.resolve(__dirname),
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "fennch.js",
@@ -28,6 +27,18 @@ module.exports = {
       commonjs2: "qs",
       amd: "qs",
       root: "qs"
+    },
+    "abort-controller": {
+      commonjs: "abort-controller",
+      commonjs2: "abort-controller",
+      amd: "abort-controller",
+      root: "abort-controller"
+    },
+    "node-fetch": {
+      commonjs: "node-fetch",
+      commonjs2: "node-fetch",
+      amd: "node-fetch",
+      root: "node-fetch"
     }
   },
   entry: path.resolve(__dirname, "src/index.js"),

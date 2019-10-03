@@ -19,7 +19,7 @@ function getType(contentType) {
  * @param      {<type>}   rawResponse  The raw response
  * @return     {Promise}  { description_of_the_return_value }
  */
-async function parseResponse(rawResponse) {
+async function parseResponse(rawResponse, Response) {
   let body = null;
   let error = null;
 
@@ -60,49 +60,44 @@ async function parseResponse(rawResponse) {
   return { body, error };
 }
 
-/**
- * Creates a response.
- *
- * @param      {<type>}   rawResponse  The raw response
- * @param      {<type>}   fRequest     The f request
- * @return     {Promise}  { description_of_the_return_value }
- */
-export default async function createResponse(rawResponse, fRequest) {
-  let { body, error } = await parseResponse(rawResponse);
-  let cancel = false
-  if (error && error instanceof DOMException && rawResponse.name === 'AbortError') {
-    cancel = true
-  }
-
-  return new Proxy(rawResponse, {
-    get(target, key) {
-      switch (key) {
-        case "request":
-          return fRequest;
-
-        case "body":
-          return body;
-
-        case "cancel":
-          return cancel;
-
-        case "error":
-          return error;
-
-        case "raw":
-          return rawResponse;
-
-        default:
-          return target[key];
-      }
-    },
-
-    set(target, key, value) {
-      if (key === "body") {
-        body = value;
-        return true;
-      }
-      return false;
+export default function makeCreateResponse(Response) {
+  return async (rawResponse, fRequest) => {
+    let { body, error } = await parseResponse(rawResponse, Response);
+    let cancel = false;
+    if (rawResponse.name === "AbortError") {
+      cancel = true;
     }
-  });
+
+    return new Proxy(rawResponse, {
+      get(target, key) {
+        switch (key) {
+          case "request":
+            return fRequest;
+
+          case "body":
+            return body;
+
+          case "cancel":
+            return cancel;
+
+          case "error":
+            return error;
+
+          case "raw":
+            return rawResponse;
+
+          default:
+            return target[key];
+        }
+      },
+
+      set(target, key, value) {
+        if (key === "body") {
+          body = value;
+          return true;
+        }
+        return false;
+      }
+    });
+  };
 }

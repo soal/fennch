@@ -1,11 +1,13 @@
+require("abort-controller/polyfill");
+
 /**
  * Class for abortable promise.
  *
  * @class      AbortablePromise (name)
  */
 class AbortablePromise {
-  constructor(executor, aborter = new AbortController()) {
-    this.abortController = aborter;
+  constructor(executor, aborter) {
+    this.abortController = aborter || new AbortController();
     if (executor instanceof Promise) {
       this.promise = executor;
     } else {
