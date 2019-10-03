@@ -75,9 +75,9 @@ export default function Fennch(
   };
 
   const fetch = fetchImpl || global.fetch;
-  const Request = fetchImpl.Request || global.Request;
-  const Response = fetchImpl.Response || global.Response;
-  const Headers = fetchImpl.Headers || global.Headers;
+  const Request = fetchImpl && fetchImpl.Request || global.Request;
+  const Response = fetchImpl && fetchImpl.Response || global.Response;
+  const Headers = fetchImpl && fetchImpl.Headers || global.Headers;
 
   const createRequest = makeCreateRequest(Request, AbortController, AbortSignal);
   const createResponse = makeCreateResponse(Response);
