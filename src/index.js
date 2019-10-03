@@ -121,7 +121,19 @@ export default function Fennch(
     const promise = new AbortablePromise(async (resolve, reject) => {
       try {
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
-        const rawResponse = await fetch(fRequest.raw);
+        let rawResponse = null
+        if (fetchImpl !== global.fetch) {
+          console.log('===========================')
+          // console.log('FETCH URL DATA', fRequest.parsedURL)
+          console.log('FETCH REQ SYMBOLS', Object.getOwnPropertySymbols(fRequest))
+          const symbols = Object.getOwnPropertySymbols(fRequest)
+          const fullUri = fRequest[symbols[1]].parsedURL.href
+          console.log('FULL URI', fullUri)
+          console.log('===========================')
+          rawResponse = await fetch(fullUri, fRequest.raw);
+        } else {
+          rawResponse = await fetch(fRequest.raw);
+        }
         let fResponse = await createResponse(rawResponse, fRequest);
         fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
 
