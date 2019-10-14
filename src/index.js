@@ -123,13 +123,8 @@ export default function Fennch(
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
         let rawResponse = null;
         if (fetchImpl !== global.fetch) {
-          // console.log('===========================')
-          // console.log('FETCH URL DATA', fRequest.parsedURL)
-          // console.log('FETCH REQ SYMBOLS', Object.getOwnPropertySymbols(fRequest))
           const symbols = Object.getOwnPropertySymbols(fRequest);
           const fullUri = fRequest[symbols[1]].parsedURL.href;
-          // console.log('FULL URI', fullUri)
-          // console.log('===========================')
           rawResponse = await fetch(fullUri, fRequest.raw);
         } else {
           rawResponse = await fetch(fRequest.raw);
@@ -139,8 +134,8 @@ export default function Fennch(
 
         resolve(fResponse);
       } catch (err) {
-        // console.log('ERROR: ', err)
         const fResponse = await createResponse(err, fRequest);
+        fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
         reject(fResponse);
       }
     }, fRequest.abortController);
