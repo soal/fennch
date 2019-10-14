@@ -39,7 +39,12 @@ export default function Interceptor() {
     },
 
     interceptResponse(abortController, response) {
-      let promise = AbortablePromise.resolve(abortController, response);
+      let promise
+      if (response.name === 'Error') {
+        promise = AbortablePromise.reject(abortController, response);
+      } else {
+        promise = AbortablePromise.resolve(abortController, response);
+      }
       const reversedInterceptors = this.interceptors.slice().reverse();
 
       reversedInterceptors.forEach(({ response, responseError }) => {

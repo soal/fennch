@@ -133,8 +133,12 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
   return config => {
     let fRequest = null;
     if (config instanceof Request) {
-      // console.log("FREQUEST: CONFIG AS REQUEST ", config)
-      const abortController = config.abortController || new AbortController();
+      let abortController
+      if (config.abortController && !config.abortController.signal.aborted) {
+        abortController = config.abortController
+      } else {
+        abortController = new AbortController();
+      }
 
       const abortSignalProto =
         abortController.signal &&
@@ -175,14 +179,10 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
           body = JSON.stringify(body);
         }
       }
-      // console.log("FREQUEST: BEFORE CREATING NON-NATIVE")
-      // console.log("FREQUEST: CONFIG NOT NATIVE ABORT SIGNAL")
       const abortSignalProto =
         abortController.signal &&
         typeof abortController.signal === "object" &&
         Object.getPrototypeOf(abortController.signal);
-      // console.log("ABORT SIGNAL NAME ", abortSignalProto.constructor.name)
-      // console.log("ABORT SIGNAL IS INSTANCE OF", abortController.signal instanceof AbortSignal)
       if (abortSignalProto.constructor.name !== "AbortSignal") {
         // HACK: Inside node-fetch AbortSingnal type cheked by `name` of `abortSignalProto.constructor`.
         // It breaks after minimization, so we need to set `name` explicitly
@@ -197,7 +197,6 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
         mode,
         signal: abortController.signal
       });
-      // console.log("FREQUEST: RAW REQUEST CREATED")
 
       fRequest = makeProxy(rawRequest, body, abortController);
 

@@ -118,6 +118,7 @@ export default function Fennch(
   };
 
   const makeRequest = fRequest => {
+    let isTimeoutExceeded = false
     const promise = new AbortablePromise(async (resolve, reject) => {
       try {
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
@@ -134,7 +135,11 @@ export default function Fennch(
 
         resolve(fResponse);
       } catch (err) {
-        const fResponse = await createResponse(err, fRequest);
+        if (err.code === 20 && isTimeoutExceeded) {
+          err = new Error("Timeout exceeded")
+        }
+        let fResponse;
+        fResponse = await createResponse(err, fRequest);
         fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
         reject(fResponse);
       }
@@ -155,9 +160,10 @@ export default function Fennch(
         value => {
           return value;
         },
-        err => {
+        async err => {
           if (err && err.message === "Timeout exceeded") {
-            promise.abort();
+              isTimeoutExceeded = true
+              return promise.abort();
           }
           return Promise.reject(err);
         }
