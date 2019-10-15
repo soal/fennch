@@ -157,11 +157,12 @@ export default function Fennch(
         }
         let fResponse;
         fResponse = await createResponse(err, fRequest);
-        fResponse = await fennch.interceptor.interceptResponseError(fRequest.abortController, fResponse);
-        if (fResponse && fResponse.name === "Error") {
-          reject(fResponse);
-        } else {
+        try {
+          fResponse = await fennch.interceptor.interceptResponseError(fRequest.abortController, fResponse);
           resolve(fResponse);
+        } catch (err) {
+          reject(err);
+
         }
       }
     }, fRequest.abortController);
