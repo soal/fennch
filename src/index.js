@@ -129,6 +129,7 @@ export default function Fennch(
         }, timeout);
       }
 
+      const clonedFRequest = createRequest(fRequest)
       try {
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
         let rawResponse = null;
@@ -147,7 +148,7 @@ export default function Fennch(
           rawResponse = await fetch(fRequest.raw);
           clearTimeout(timerId)
         }
-        let fResponse = await createResponse(rawResponse, fRequest);
+        let fResponse = await createResponse(rawResponse, clonedFRequest);
         fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
 
         resolve(fResponse);
@@ -156,7 +157,7 @@ export default function Fennch(
           err = new Error("Timeout exceeded")
         }
         let fResponse;
-        fResponse = await createResponse(err, fRequest);
+        fResponse = await createResponse(err, clonedFRequest);
         try {
           fResponse = await fennch.interceptor.interceptResponseError(fRequest.abortController, fResponse);
           resolve(fResponse);

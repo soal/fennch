@@ -158,7 +158,6 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
       const rawRequest = new Request(clonedRawRequest, {
         signal: abortController.signal
       });
-
       fRequest = makeProxy(rawRequest, config.body, abortController);
     } else {
       let { baseUri, path, mode, method, globalHeaders, headers, params, body, arrayFormat, abortController } = config;
@@ -173,9 +172,7 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
       if (method !== "GET" && method !== "HEAD") {
         const isBinary = [Blob, FormData].reduce((acc, type) => body instanceof type);
 
-        if (isBinary) {
-          body = body;
-        } else {
+        if (!isBinary) {
           body = JSON.stringify(body);
         }
       }
