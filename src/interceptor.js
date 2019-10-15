@@ -38,21 +38,25 @@ export default function Interceptor() {
       return promise;
     },
 
-    interceptResponse(abortController, response) {
-      let promise
-      if (response.name === 'Error') {
-        promise = AbortablePromise.reject(abortController, response);
-      } else {
-        promise = AbortablePromise.resolve(abortController, response);
+    async interceptResponseError(abortController, response) {
+      let promise = AbortablePromise.reject(abortController, response);
+      const reversedInterceptors = this.interceptors.slice().reverse();
+
+      for (let { responseError } of reversedInterceptors) {
+        if (typeof responseError === "function") {
+          promise = promise.catch(responseError);
+        }
       }
+      return promise
+    },
+
+    interceptResponse(abortController, response) {
+      let promise = AbortablePromise.resolve(abortController, response);
       const reversedInterceptors = this.interceptors.slice().reverse();
 
       reversedInterceptors.forEach(({ response, responseError }) => {
         if (typeof response === "function") {
           promise = promise.then(response);
-        }
-        if (typeof responseError === "function") {
-          promise = promise.catch(responseError);
         }
       });
       return promise;

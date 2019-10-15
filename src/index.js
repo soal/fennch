@@ -99,7 +99,6 @@ export default function Fennch(
 
     const abortController = new AbortController();
 
-    // console.log("PREPARE")
     const fRequest = createRequest({
       baseUri: options.baseUri,
       path,
@@ -112,23 +111,41 @@ export default function Fennch(
       arrayFormat: fennch.opts.arrayFormat,
       abortController
     });
-    // console.log("PREPARE: FREQUEST CREATED", fRequest)
 
     return fRequest;
   };
 
   const makeRequest = fRequest => {
     let isTimeoutExceeded = false
+    const timeout = fRequest.timeout || fennch.opts.timeout;
+
     const promise = new AbortablePromise(async (resolve, reject) => {
+      let timerId = null
+
+      const makeTimeout = fReq => {
+        return setTimeout(() => {
+          isTimeoutExceeded = true
+          fReq.abortController.abort()
+        }, timeout);
+      }
+
       try {
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
         let rawResponse = null;
         if (fetchImpl !== global.fetch) {
           const symbols = Object.getOwnPropertySymbols(fRequest);
           const fullUri = fRequest[symbols[1]].parsedURL.href;
+          if (timeout > 0) {
+            timerId = makeTimeout(fRequest)
+          }
           rawResponse = await fetch(fullUri, fRequest.raw);
+          clearTimeout(timerId)
         } else {
+          if (timeout > 0) {
+            timerId = makeTimeout(fRequest)
+          }
           rawResponse = await fetch(fRequest.raw);
+          clearTimeout(timerId)
         }
         let fResponse = await createResponse(rawResponse, fRequest);
         fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
@@ -140,35 +157,15 @@ export default function Fennch(
         }
         let fResponse;
         fResponse = await createResponse(err, fRequest);
-        fResponse = await fennch.interceptor.interceptResponse(fRequest.abortController, fResponse);
-        reject(fResponse);
+        fResponse = await fennch.interceptor.interceptResponseError(fRequest.abortController, fResponse);
+        if (fResponse && fResponse.name === "Error") {
+          reject(fResponse);
+        } else {
+          resolve(fResponse);
+        }
       }
     }, fRequest.abortController);
 
-    const timeout = fRequest.timeout || fennch.opts.timeout;
-
-    if (timeout > 0) {
-      let timerId = null;
-      const timer = new Promise((resolve, reject) => {
-        timerId = setTimeout(() => {
-          clearTimeout(timerId);
-          reject(new Error("Timeout exceeded"));
-        }, timeout);
-      });
-
-      return AbortablePromise.race(fRequest.abortController, [promise, timer]).then(
-        value => {
-          return value;
-        },
-        async err => {
-          if (err && err.message === "Timeout exceeded") {
-              isTimeoutExceeded = true
-              return promise.abort();
-          }
-          return Promise.reject(err);
-        }
-      );
-    }
     return promise;
   };
 
