@@ -133,7 +133,7 @@ export default function Fennch(
       try {
         fRequest = await fennch.interceptor.interceptRequest(fRequest);
         let rawResponse = null;
-        if (fetchImpl !== global.fetch) {
+        if (fetch !== global.fetch) {
           const symbols = Object.getOwnPropertySymbols(fRequest);
           const fullUri = fRequest[symbols[1]].parsedURL.href;
           if (timeout > 0) {
