@@ -96,6 +96,10 @@ export default function makeCreateResponse(Response) {
           body = value;
           return true;
         }
+        if (key === "cancel") {
+          target.cancel = value;
+          return true;
+        }
         return false;
       }
     });
