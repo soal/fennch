@@ -27,31 +27,35 @@ async function parseResponse(rawResponse, Response) {
     if (rawResponse.status === 204 && rawResponse.ok) {
       return { body, error };
     }
-    const type = getType(rawResponse.headers.get("Content-Type"));
-    switch (type) {
-      case "json":
-        try {
-          body = await rawResponse.json();
-        } catch (err) {
-          error = err;
-        }
-        break;
+    const contentType = rawResponse.headers.get("Content-Type")
+    if (contentType) {
+      switch (getType(contentType)) {
+        case "json":
+          try {
+            body = await rawResponse.json();
+          } catch (err) {
+            error = err;
+          }
+          break;
 
-      case "text":
-        try {
-          body = await rawResponse.text();
-        } catch (err) {
-          error = err;
-        }
-        break;
+        case "text":
+          try {
+            body = await rawResponse.text();
+          } catch (err) {
+            error = err;
+          }
+          break;
 
-      default:
-        try {
-          body = await rawResponse.blob();
-        } catch (err) {
-          error = err;
-        }
-        break;
+        default:
+          try {
+            body = await rawResponse.blob();
+          } catch (err) {
+            error = err;
+          }
+          break;
+      }
+    } else {
+      error = rawResponse
     }
   } else {
     error = rawResponse;
