@@ -177,8 +177,9 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
 
       let isBinary = false
       if (method !== "GET" && method !== "HEAD") {
-
-        isBinary = [global.Blob, global.FormData].reduce((acc, type) => acc || (type &&  body instanceof type));
+        const Blob = global.Blob || null
+        const FormData  = global.FormData || null
+        isBinary = [Blob, FormData].reduce((acc, type) => acc || (type && body instanceof type), false);
 
         if (!isBinary) {
           body = JSON.stringify(body);
