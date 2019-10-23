@@ -72,7 +72,7 @@ function makeHeadersProxy(requestHeaders) {
  * @param      {<type>}  abortController  The abort controller
  * @return     {Proxy}   { description_of_the_return_value }
  */
-function makeProxy(rawRequest, body, abortController) {
+function makeProxy(rawRequest, body, abortController, isBinary, url) {
   return new Proxy(rawRequest, {
     get(target, key) {
       if (typeof target[key] === "function") {
@@ -103,6 +103,12 @@ function makeProxy(rawRequest, body, abortController) {
 
         case "body":
           return body;
+
+        case "url":
+          return url;
+
+        case "isBinary":
+          return isBinary;
 
         default:
           return target[key];
@@ -158,7 +164,7 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
       const rawRequest = new Request(clonedRawRequest, {
         signal: abortController.signal
       });
-      fRequest = makeProxy(rawRequest, config.body, abortController);
+      fRequest = makeProxy(rawRequest, config.body, abortController, config.isBinary, config.url);
     } else {
       let { baseUri, path, mode, method, globalHeaders, headers, params, body, arrayFormat, abortController } = config;
       const fullUri = `${baseUri}${path}${params ? "?" + qs.stringify(params, { arrayFormat }) : ""}`;
@@ -169,8 +175,10 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
         method = "GET";
       }
 
+      let isBinary = false
       if (method !== "GET" && method !== "HEAD") {
-        const isBinary = [Blob, FormData].reduce((acc, type) => body instanceof type);
+
+        isBinary = [global.Blob, global.FormData].reduce((acc, type) => acc || (type &&  body instanceof type));
 
         if (!isBinary) {
           body = JSON.stringify(body);
@@ -195,7 +203,7 @@ export default function makeCreateRequest(Request, AbortController, AbortSignal)
         signal: abortController.signal
       });
 
-      fRequest = makeProxy(rawRequest, body, abortController);
+      fRequest = makeProxy(rawRequest, body, abortController, isBinary, fullUri);
 
       let allHeaders = Object.assign({}, globalHeaders, headers);
 

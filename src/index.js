@@ -145,7 +145,18 @@ export default function Fennch(
           if (timeout > 0) {
             timerId = makeTimeout(fRequest)
           }
-          rawResponse = await fetch(fRequest.raw);
+          const { cache, credentials, headers, integrity, mode, redirect, referrer, method } = fRequest;
+          const init = { cache, credentials, headers, integrity, mode, redirect, referrer, method }
+
+          if (fRequest.method.toLowerCase() !== "get" && fRequest.method.toLowerCase() !== "head") {
+            if (fRequest.isBinary) {
+              init.body = await fRequest.blob()
+            } else {
+              init.body = await fRequest.text()
+            }
+          }
+
+          rawResponse = await fetch(fRequest.url, init);
           clearTimeout(timerId)
         }
         let fResponse = await createResponse(rawResponse, clonedFRequest);
