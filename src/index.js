@@ -145,8 +145,8 @@ export default function Fennch(
           if (timeout > 0) {
             timerId = makeTimeout(fRequest)
           }
-          const { cache, credentials, headers, integrity, mode, redirect, referrer, method } = fRequest;
-          const init = { cache, credentials, headers, integrity, mode, redirect, referrer, method }
+          const { cache, credentials, headers, integrity, mode, redirect, referrer, method, signal } = fRequest;
+          const init = { cache, credentials, headers, integrity, mode, redirect, referrer, method, signal }
 
           if (fRequest.method.toLowerCase() !== "get" && fRequest.method.toLowerCase() !== "head") {
             if (fRequest.isBinary) {
