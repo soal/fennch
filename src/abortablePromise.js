@@ -1,4 +1,4 @@
-require("abort-controller/polyfill");
+import "abort-controller/polyfill";
 
 /**
  * Class for abortable promise.

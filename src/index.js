@@ -40,8 +40,6 @@ import AbortablePromise from "./abortablePromise";
 import makeCreateResponse from "./fResponse";
 import makeCreateRequest from "./fRequest";
 
-require("abort-controller/polyfill");
-
 const methods = ["get", "head", "post", "put", "del", "delete", "options", "patch"];
 
 /**
@@ -74,10 +72,10 @@ export default function Fennch(
     opts
   };
 
-  const fetch = fetchImpl || global.fetch;
-  const Request = fetchImpl && fetchImpl.Request || global.Request;
-  const Response = fetchImpl && fetchImpl.Response || global.Response;
-  const Headers = fetchImpl && fetchImpl.Headers || global.Headers;
+  const fetch = fetchImpl || globalThis.fetch;
+  const Request = fetchImpl && fetchImpl.Request || globalThis.Request;
+  const Response = fetchImpl && fetchImpl.Response || globalThis.Response;
+  const Headers = fetchImpl && fetchImpl.Headers || globalThis.Headers;
 
   const createRequest = makeCreateRequest(Request, AbortController, AbortSignal);
   const createResponse = makeCreateResponse(Response);
