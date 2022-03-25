@@ -10,7 +10,6 @@ Modern fetch-based HTTP client for the browser.
 </p>
 
 - [Quickstart](#quickstart)
-- [Story →](https://soal.red/fennch)
 
 ## Quickstart
 
